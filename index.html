@@ -408,20 +408,20 @@ function block(p,b,i){
  const hd=el('span','hd',{textContent:'⠿',title:'Arraste para mover',draggable:true});
  if(t){d.style.background=b.bg;if(b.dir=='v')d.classList.add('vertical');
   const x=ed('t',b,'text','Escreva aqui…');x.style.fontSize=b.fs+'pt';d.append(hd,x);return d}
- const wrap=el('div','searchbox'),s=el('input','sku',{value:b.sku,placeholder:'SKU ou buscar por descrição…'}),results=el('div','results'),ph=el('div','ph');wrap.append(s,results);
+ const wrap=el('div','searchbox'),s=el('input','sku',{value:b.sku,placeholder:'Buscar por descrição do produto…'}),results=el('div','results'),ph=el('div','ph');results.style.position='fixed';results.style.zIndex='99999';wrap.append(s,results);
  const setProduct=u=>{const sk=String(u.sku||'').trim();let onde=null;
   S.pages.forEach((q,kk)=>q.blocks.forEach(x=>{if(x!==b&&x.type!=='txt'&&String(x.sku||'').trim()===sk&&!onde)onde=kk+2}));
   results.classList.remove('show');
   act(()=>{b.sku=sk;if(!b.name)b.name=u.desc||'';b.img=u.url||b.img;if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)});
   if(onde)toast('⚠ O SKU '+sk+' já está no guia (página '+onde+').',6000)};
  const search=()=>{const q=s.value.trim();results.innerHTML='';if(!q){results.classList.remove('show');return}
+  const rect=s.getBoundingClientRect();results.style.left=rect.left+'px';results.style.width=rect.width+'px';results.style.top=Math.min(rect.bottom,window.innerHeight-120)+'px';results.style.maxHeight=Math.max(120,window.innerHeight-Math.min(rect.bottom,window.innerHeight-120)-12)+'px';
   const hits=findProducts(q);
-  const ex=DB.get(q);if(ex){let more=false;for(const u of DB.values()){if(u!==ex&&String(u.sku).startsWith(q)){more=true;break}}if(!more){setProduct(ex);return}}
-  for(const u of hits.list){const r=el('div','result');r.append(el('b','',{textContent:u.desc||'Sem descrição'}),el('small','',{textContent:'SKU: '+u.sku}));r.onclick=e=>{e.stopPropagation();setProduct(u)};results.append(r)}
+  for(const u of hits.list){const r=el('div','result'),pic=el('img','',{src:u.url||'',alt:'',loading:'lazy'});pic.style.cssText='width:42px;height:42px;object-fit:contain;border:1px solid #edf0f5;border-radius:6px;background:#fff;flex:none';pic.onerror=()=>{pic.style.visibility='hidden'};const txt=el('div','');txt.style.cssText='min-width:0;flex:1';txt.append(el('b','',{textContent:u.desc||'Sem descrição'}),el('small','',{textContent:'SKU: '+u.sku}));r.style.cssText='display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;border-bottom:1px solid #f0f1f5;line-height:1.25';r.append(pic,txt);r.onclick=e=>{e.stopPropagation();setProduct(u)};results.append(r)}
   if(!hits.list.length)results.append(el('div','nores',{textContent:'Nenhum produto encontrado'}));
   else if(hits.total>hits.list.length)results.append(el('div','nores',{textContent:'Mostrando '+hits.list.length+' de '+hits.total.toLocaleString('pt-BR')+' — continue digitando para refinar'}));
   results.classList.add('show')};
- s.oninput=search;s.onkeydown=e=>{if(e.key==='Enter'){const x=DB.get(s.value.trim());if(x)setProduct(x);else{const h=findProducts(s.value,1).list[0];if(h)setProduct(h)}}};
+ s.oninput=search;window.addEventListener('resize',()=>{if(results.classList.contains('show'))search()});window.addEventListener('scroll',()=>{if(results.classList.contains('show')){const r=s.getBoundingClientRect();results.style.left=r.left+'px';results.style.width=r.width+'px';results.style.top=Math.min(r.bottom,window.innerHeight-120)+'px'}},true);s.onkeydown=e=>{if(e.key==='Enter'){const h=findProducts(s.value,1).list[0];if(h)setProduct(h)}};
  const show=()=>{ph.innerHTML='';if(b.img){ph.append(el('img','',{src:b.img,draggable:false}));return}if(!b.sku){ph.innerHTML='<span>digite o SKU<br>ou busque pela descrição</span>';return}const u=DB.get(String(b.sku).trim());if(!u){ph.textContent=DB.size?'SKU não encontrado':'carregue a planilha';return}let url=String(u.url||'');const m=url.match(/(https?:)?\/\/[^\s"';)]+/i);url=(m?m[0]:url).trim();if(url.startsWith('//'))url='https:'+url;ph.append(el('img','',{src:url,draggable:false}))};
  const buyerTag=el('div','buyerTag',{title:'Comprador responsável'});
  if(b.buyer){const bt=el('span','',{textContent:'Comprador: '+b.buyer});bt.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';buyerTag.append(bt)}
