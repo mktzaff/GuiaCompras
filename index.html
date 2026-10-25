@@ -276,78 +276,29 @@ function openDbManager(){
 }
 const normHead=x=>String(x??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'');
 // ---- Excel ----
-// Exporta no formato do "boneco": cada página vira uma coluna e os itens
-// ficam em sequência nas linhas. O arquivo de referência serve somente como
-// modelo de estrutura; nenhum conteúdo do boneco é importado para cá.
+// Uma linha por item: Pág. | Tema | Item nº | SKU | Item (descrição) | Complemento | Comprador.
+// "Pág." usa o mesmo número impresso no rodapé de cada página do guia (a primeira página interna é a 2).
 $('xl').onclick=()=>{
  if(!window.XLSX){toast('A biblioteca de Excel não carregou (precisa de internet).',7000);return}
-
- const pages=(S.pages||[]).map((p,i)=>({
-   title:String(p.title||('Página '+String(i+1).padStart(2,'0'))),
-   blocks:(p.blocks||[]).filter(b=>b && b.type!=='txt' && (b.sku||b.name||b.desc))
- }));
- const total=pages.reduce((n,p)=>n+p.blocks.length,0);
- if(!total){toast('Ainda não há produtos neste guia.');return}
-
- // Estrutura baseada no boneco enviado:
- // A = identificação do item | B em diante = uma coluna por página.
- const maxItems=Math.max(0,...pages.map(p=>p.blocks.length));
- const pageHeaders=pages.map((_,i)=>'Página '+String(i+1).padStart(2,'0'));
- const rows=[];
- rows.push(['','','','']);
- rows.push(['','Lista de Envio','1ª prova','Validade']);
- rows.push(['','','','']);
- rows.push(['','','','','','','','','']);
- rows.push(['Tema',...pageHeaders]);
- rows.push(['',...pages.map(p=>p.title)]);
-
- for(let i=0;i<maxItems;i++){
-   const row=['Item '+String(i+1).padStart(2,'0')];
-   pages.forEach(p=>{
-     const b=p.blocks[i];
-     if(!b){row.push('');return}
-     // Apenas o conteúdo textual do item, sem URL/imagem e respeitando a ordem.
-     row.push(String(b.name||b.desc||b.sku||'').trim());
-   });
-   rows.push(row);
- }
-
- const wb=XLSX.utils.book_new();
+ const head=['Pág.','Tema','Item nº','SKU','Item (descrição)','Complemento (gramatura etc.)','Comprador'];
+ const rows=[head];
+ (S.pages||[]).forEach((p,k)=>{
+  let n=0;
+  (p.blocks||[]).forEach(b=>{
+   if(!b||b.type==='txt'||!(b.sku||b.name||b.desc))return;
+   n++;
+   const sku=String(b.sku||'').trim(),name=String(b.name||'').trim(),desc=String(b.desc||'').trim();
+   rows.push([k+2,String(p.title||'').trim(),n,sku,name||desc||sku,name?desc:'',String(b.buyer||'').trim()]);
+  });
+ });
+ if(rows.length<2){toast('Ainda não há produtos neste guia.');return}
  const ws=XLSX.utils.aoa_to_sheet(rows);
- ws['!merges']=[{s:{r:4,c:0},e:{r:5,c:0}}];
- const widths=[7.22,...pages.map(p=>{
-   const vals=[p.title,...p.blocks.map(b=>String(b.name||b.desc||b.sku||''))];
-   const longest=Math.max(18,...vals.map(v=>v.length));
-   return Math.min(48,Math.max(24,Math.round(longest*0.9)));
- })];
- ws['!cols']=widths.map(w=>({wch:w}));
- ws['!rows']=[{hpt:18},{hpt:20},{hpt:18},{hpt:8},{hpt:22},{hpt:22}];
-
- // Estilos próximos ao modelo enviado.
- const border={style:'thin',color:{rgb:'000000'}};
- const fillHeader={patternType:'solid',fgColor:{rgb:'D9EAD3'}};
- const fillPage={patternType:'solid',fgColor:{rgb:'FFF2CC'}};
- const centered={horizontal:'center',vertical:'center',wrapText:true};
- const setStyle=(cell,style)=>{if(ws[cell])ws[cell].s=style};
- ['B2','C2','D2'].forEach(a=>setStyle(a,{font:{bold:true,sz:11},fill:fillHeader,alignment:centered,border:{top:border,bottom:border,left:border,right:border}}));
- setStyle('A5',{font:{bold:true,sz:11},alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
- for(let c=1;c<=pages.length;c++){
-   const col=XLSX.utils.encode_col(c);
-   setStyle(col+'5',{font:{bold:true,sz:11},fill:fillHeader,alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
-   setStyle(col+'6',{font:{bold:true,sz:11},fill:fillPage,alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
- }
- for(let r=7;r<7+maxItems;r++){
-   setStyle('A'+r,{font:{sz:11},alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
-   for(let c=1;c<=pages.length;c++){
-     const cell=XLSX.utils.encode_col(c)+r;
-     setStyle(cell,{font:{sz:11},alignment:{vertical:'top',wrapText:true},border:{top:border,bottom:border,left:border,right:border}});
-   }
- }
-
- XLSX.utils.book_append_sheet(wb,ws,'Planilha1');
+ ws['!cols']=head.map((h,c)=>({wch:Math.min(60,Math.max(h.length+2,...rows.slice(1).map(r=>String(r[c]??'').length+2),6))}));
+ ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length-1,c:head.length-1}})};
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Itens');
  const filename=((S.cover.title||'guia')+' - itens.xlsx').replace(/[\\/:*?"<>|]/g,'');
- XLSX.writeFile(wb,filename,{cellStyles:true});
- toast('Excel gerado no formato do boneco com '+total+' itens.');
+ XLSX.writeFile(wb,filename);
+ toast('Excel gerado: '+(rows.length-1)+' itens, uma linha por item.');
 };
 
 // ---- biblioteca de guias ----
