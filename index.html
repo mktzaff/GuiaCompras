@@ -173,8 +173,29 @@ const newPage=()=>({title:'seção',rows:4,blocks:[]});
 const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:'',buyer:''});
 const newText=()=>({type:'txt',w:1,h:2,text:'',bg:'#fbe4ee',fs:11,dir:'h'});
 // O estado do Guia é salvo no Firestore para ficar compartilhado entre os computadores autorizados.
-const kvGet=async k=>{await authReady;try{const snap=await getDoc(doc(cloudDb,'appdata',String(k)));return snap.exists()?snap.data().value:undefined}catch(e){console.error('Falha ao ler dados do Guia:',e);return undefined}};
-const kvSet=async (k,v)=>{await authReady;try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia:',e);const msg=(e&&e.code==='permission-denied')?'Sem permissão para salvar no banco. Confira as regras do Firestore e o UID da conta.':'Falha ao salvar no banco. Confira a conexão e tente novamente.';if(typeof toast==='function')toast(msg,5000);else console.warn(msg);}};
+// Bancos grandes são divididos em documentos menores para respeitar o limite de 1 MiB do Firestore.
+const bankKeys=new Set(['db','buyers']);
+const readDocValue=async key=>{const snap=await getDoc(doc(cloudDb,'appdata',String(key)));return snap.exists()?snap.data().value:undefined};
+const kvGet=async k=>{await authReady;try{
+ if(bankKeys.has(String(k))){
+  const meta=await readDocValue(String(k)+'__meta');
+  if(meta&&meta.version&&Number.isInteger(meta.count)){
+   const all=[];
+   for(let i=0;i<meta.count;i++){const part=await readDocValue(String(k)+'__'+meta.version+'__'+i);if(Array.isArray(part))all.push(...part);else throw new Error('Parte ausente do banco '+k+' ('+i+')');}
+   return all;
+  }
+ }
+ return await readDocValue(k);
+ }catch(e){console.error('Falha ao ler dados do Guia:',e);if(typeof toast==='function')toast('Não foi possível carregar '+(k==='db'?'o banco de produtos':k==='buyers'?'os vínculos de compradores':'os dados')+'. Confira a conexão e o Firebase.',7000);return undefined}};
+const kvSet=async (k,v)=>{await authReady;try{
+ const stamp=new Date().toISOString(), user=signedUser?.uid||'';
+ if(bankKeys.has(String(k))&&Array.isArray(v)){
+  const version=Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8), size=250, count=Math.ceil(v.length/size);
+  for(let i=0;i<count;i++) await setDoc(doc(cloudDb,'appdata',String(k)+'__'+version+'__'+i),{value:v.slice(i*size,(i+1)*size),updatedAt:stamp,updatedBy:user});
+  await setDoc(doc(cloudDb,'appdata',String(k)+'__meta'),{value:{version,count,length:v.length},updatedAt:stamp,updatedBy:user});
+ }else await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:stamp,updatedBy:user});
+ return true;
+ }catch(e){console.error('Falha ao salvar dados do Guia:',e);const code=e?.code||'erro-desconhecido';const msg=(code==='permission-denied')?'Sem permissão para salvar no banco. Confira as regras do Firestore e o UID da conta.':'Falha ao salvar no Firebase ('+code+'). Os dados podem não ter sido gravados; confira a conexão e o Console.';if(typeof toast==='function')toast(msg,8000);else console.warn(msg);return false;}};
 const norm=()=>{if(!S.cover)S.cover=fresh().cover;if(!S.pages||!S.pages.length)S.pages=[newPage(),newPage()];
  S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}}))};
 const meta=()=>{const m=LIB.list.find(x=>x.id==ID);if(m){m.pages=S.pages.length+1;m.prods=S.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.type!='txt'&&(b.sku||b.img||b.name)).length,0);m.c1=S.cover.c1;m.c2=S.cover.c2}};
@@ -528,7 +549,7 @@ async function migrateLocalIfCloudEmpty(){
   const localDb=await new Promise((resolve,reject)=>{const req=indexedDB.open('guia5',1);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
   if(!localDb.objectStoreNames.contains('kv')) return;
   const entries=await new Promise((resolve,reject)=>{const tx=localDb.transaction('kv','readonly'),store=tx.objectStore('kv'),keysReq=store.getAllKeys(),valsReq=store.getAll();tx.oncomplete=()=>resolve(keysReq.result.map((k,i)=>[k,valsReq.result[i]]));tx.onerror=()=>reject(tx.error)});
-  for(const [key,value] of entries){await setDoc(doc(cloudDb,'appdata',String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
+  for(const [key,value] of entries){if(bankKeys.has(String(key))) await kvSet(String(key),value); else await setDoc(doc(cloudDb,'appdata',String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
   if(entries.length) console.info('Dados locais migrados para o Firestore:',entries.length);
  } catch(e){console.warn('Migração local não executada:',e)}
 }
