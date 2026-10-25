@@ -182,7 +182,8 @@ const kvGet=async k=>{await authReady;try{
   if(meta&&meta.version&&Number.isInteger(meta.count)){
    const all=[];
    for(let i=0;i<meta.count;i++){const part=await readDocValue(String(k)+'__'+meta.version+'__'+i);if(Array.isArray(part))all.push(...part);else throw new Error('Parte ausente do banco '+k+' ('+i+')');}
-   return all;
+   // Firestore não aceita arrays aninhados; reconstitui os pares [chave, valor] no navegador.
+   return all.map(item=>Array.isArray(item)?item:(k==='db'?[item.sku,item.product]:[item.sku,item.buyer]));
   }
  }
  return await readDocValue(k);
@@ -190,9 +191,12 @@ const kvGet=async k=>{await authReady;try{
 const kvSet=async (k,v)=>{await authReady;try{
  const stamp=new Date().toISOString(), user=signedUser?.uid||'';
  if(bankKeys.has(String(k))&&Array.isArray(v)){
-  const version=Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8), size=250, count=Math.ceil(v.length/size);
-  for(let i=0;i<count;i++) await setDoc(doc(cloudDb,'appdata',String(k)+'__'+version+'__'+i),{value:v.slice(i*size,(i+1)*size),updatedAt:stamp,updatedBy:user});
-  await setDoc(doc(cloudDb,'appdata',String(k)+'__meta'),{value:{version,count,length:v.length},updatedAt:stamp,updatedBy:user});
+  const version=Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8), size=250;
+  // Serializa cada par como objeto simples: Firestore rejeita arrays aninhados (invalid-argument).
+  const serial=v.map(pair=>Array.isArray(pair)?(String(k)==='db'?{sku:String(pair[0]),product:pair[1]}:{sku:String(pair[0]),buyer:pair[1]}):pair);
+  const count=Math.ceil(serial.length/size);
+  for(let i=0;i<count;i++) await setDoc(doc(cloudDb,'appdata',String(k)+'__'+version+'__'+i),{value:serial.slice(i*size,(i+1)*size),updatedAt:stamp,updatedBy:user});
+  await setDoc(doc(cloudDb,'appdata',String(k)+'__meta'),{value:{version,count,length:serial.length},updatedAt:stamp,updatedBy:user});
  }else await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:stamp,updatedBy:user});
  return true;
  }catch(e){console.error('Falha ao salvar dados do Guia:',e);const code=e?.code||'erro-desconhecido';const msg=(code==='permission-denied')?'Sem permissão para salvar no banco. Confira as regras do Firestore e o UID da conta.':'Falha ao salvar no Firebase ('+code+'). Os dados podem não ter sido gravados; confira a conexão e o Console.';if(typeof toast==='function')toast(msg,8000);else console.warn(msg);return false;}};
