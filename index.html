@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Guia de Compras · v23</title>
+<title>Guia de Compras · v24 — correção de imagens</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--ac:#1a8fe3;--ui:#4f7cff;--ui2:#8b5cf6;--e:cubic-bezier(.2,.85,.3,1)}
@@ -307,6 +307,24 @@ function ask(o){return new Promise(res=>{const m=$('dlg');m.innerHTML='';m.class
  if(inp){inp.focus();inp.onkeydown=e=>{if(e.key=='Enter'&&!o.area)done(inp.value)}}})}
 function animate(){const a=$('stage');a.classList.remove('anim');void a.offsetWidth;a.classList.add('anim');clearTimeout(animate.t);animate.t=setTimeout(()=>a.classList.remove('anim'),1200)}
 
+// Normaliza links de imagem vindos de Excel/CSV e links já salvos.
+function normalizeImageUrl(value){
+ let s=String(value??'').replace(/\uFEFF/g,'').trim();
+ if(!s)return '';
+ s=s.replace(/^=\s*(?:IMAGE|IMAGEM|HYPERLINK|HIPERLINK)\s*\(/i,'').replace(/\s*\)\s*$/,'').trim();
+ const quoted=s.match(/^['"]([\s\S]*?)['"](?:\s*[;,].*)?$/);
+ if(quoted)s=quoted[1].trim();
+ s=s.replace(/&amp;/gi,'&').replace(/&#38;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;/gi,"'");
+ // Algumas planilhas exportam texto adicional junto com o endereço.
+ const m=s.match(/(?:https?:)?\/\/[^\s"'<>]+|(?:www\.)[^\s"'<>]+/i);
+ if(m)s=m[0];
+ s=s.replace(/[),;]+$/,'').trim();
+ if(s.startsWith('//'))s='https:'+s;
+ else if(/^www\./i.test(s))s='https://'+s;
+ if(!/^https?:\/\//i.test(s)&&!/^data:image\//i.test(s)&&!/^blob:/i.test(s))return '';
+ return s;
+}
+
 // ---- planilha ----
 const dbLabel=()=>{$('dbm').textContent='🗄 Banco'+(DB.size||BUYERS.size?' ✓':'')};
 $('dbm').onclick=openDbManager;
@@ -336,9 +354,9 @@ function openDbManager(){
   try{const chosen=await chooseSheet();if(!chosen)return;const {R}=chosen,hi=headerInfo(R,[['SEQPRODUTO','SKU','CODPRODUTO','CODIGO','CODITEM'],['DESCRICAO','PRODUTO','NOMEPRODUTO','DESCRICAOPRODUTO','DESCRICAODOPRODUTO','NOMEDOPRODUTO']]);
    const hs=hi.find(['SEQPRODUTO','SKU','CODPRODUTO','CODIGO','CODITEM']),hd=hi.find(['DESCRICAO','PRODUTO','NOMEPRODUTO','DESCRICAOPRODUTO','DESCRICAODOPRODUTO','NOMEDOPRODUTO']),hu=hi.find(['URL','IMAGEM','FOTO','LINKIMAGEM','URLIMAGEM','LINKFOTO']);
    if(hi.score<2||hs<0||hd<0)throw new Error('Não encontrei as colunas de SKU/código e descrição nas primeiras 20 linhas. O banco atual foi mantido.');
-   const incoming=new Map();for(let j=hi.idx+1;j<R.length;j++){const row=R[j]||[],sku=skuKey(row[hs]);if(!sku)continue;const desc=String(row[hd]??'').trim(),url=hu<0?'':String(row[hu]??'').trim();if(!desc.startsWith('*'))incoming.set(sku,{sku,desc,url})}
+   const incoming=new Map();for(let j=hi.idx+1;j<R.length;j++){const row=R[j]||[],sku=skuKey(row[hs]);if(!sku)continue;const desc=String(row[hd]??'').trim(),url=hu<0?'':normalizeImageUrl(row[hu]);if(!desc.startsWith('*'))incoming.set(sku,{sku,desc,url})}
    if(!incoming.size)throw new Error('Encontrei as colunas, mas nenhum produto válido. O banco atual foi mantido.');
-   const merged=new Map(DB);for(const [sku,item] of incoming){const old=merged.get(sku)||{sku,desc:'',url:''};merged.set(sku,{sku,desc:item.desc||old.desc||'',url:item.url||old.url||''})}DB=merged;await kvSet('db',[...DB]);let updated=0,photos=0,buyersFilled=0;const before=snap();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const key=skuKey(b.sku),u=DB.get(key);if(!u)return;if(!String(b.name||'').trim()&&u.desc){b.name=u.desc;updated++}if(!String(b.buyer||'').trim()&&BUYERS.has(key)){b.buyer=BUYERS.get(key);buyersFilled++}if(!String(b.img||'').trim()&&u.url){b.img=u.url;photos++}}));if(updated||photos||buyersFilled){HIST.u.push(before);if(HIST.u.length>60)HIST.u.shift();HIST.r=[];HIST.o=null}dbLabel();status.textContent='Banco atualizado: '+DB.size.toLocaleString('pt-BR')+' produtos (inclui os produtos já existentes).';save();render();toast('Importação concluída: '+incoming.size.toLocaleString('pt-BR')+' linhas novas/atualizadas; '+DB.size.toLocaleString('pt-BR')+' produtos mantidos no banco; '+photos+' foto(s) vinculada(s).',7000);
+   const merged=new Map(DB);for(const [sku,item] of incoming){const old=merged.get(sku)||{sku,desc:'',url:''};merged.set(sku,{sku,desc:item.desc||old.desc||'',url:normalizeImageUrl(item.url)||normalizeImageUrl(old.url)||''})}DB=merged;await kvSet('db',[...DB]);let updated=0,photos=0,buyersFilled=0;const before=snap();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const key=skuKey(b.sku),u=DB.get(key);if(!u)return;if(!String(b.name||'').trim()&&u.desc){b.name=u.desc;updated++}if(!String(b.buyer||'').trim()&&BUYERS.has(key)){b.buyer=BUYERS.get(key);buyersFilled++}if(!normalizeImageUrl(b.img)&&normalizeImageUrl(u.url)){b.img=normalizeImageUrl(u.url);photos++}}));if(updated||photos||buyersFilled){HIST.u.push(before);if(HIST.u.length>60)HIST.u.shift();HIST.r=[];HIST.o=null}dbLabel();status.textContent='Banco atualizado: '+DB.size.toLocaleString('pt-BR')+' produtos (inclui os produtos já existentes).';save();render();toast('Importação concluída: '+incoming.size.toLocaleString('pt-BR')+' linhas novas/atualizadas; '+DB.size.toLocaleString('pt-BR')+' produtos mantidos no banco; '+photos+' foto(s) vinculada(s).',7000);
   }catch(err){console.error('Erro ao importar produtos:',err);toast(err.message||'Falha ao importar a planilha de produtos.',7000)}
  },'btn');
  const buyers=mk('⬆ Importar planilha de compradores e produtos','Atualiza o vínculo de comprador para cada código de produto',async()=>{
@@ -347,7 +365,7 @@ function openDbManager(){
    if(hi.score<2||hn<0||hp<0)throw new Error('Não encontrei as colunas Comprador e Cód Produto nas primeiras 20 linhas. O vínculo anterior foi mantido.');
    const grouped=new Map();for(let j=hi.idx+1;j<R.length;j++){const row=R[j]||[],sku=skuKey(row[hp]),name=String(row[hn]??'').trim(),code=hc<0?'':String(row[hc]??'').trim();if(!sku||!name)continue;const label=code?code+' · '+name:name,arr=grouped.get(sku)||[];if(!arr.includes(label))arr.push(label);grouped.set(sku,arr)}
    if(!grouped.size)throw new Error('Nenhum vínculo válido foi encontrado. O banco anterior foi mantido.');
-   const mergedBuyers=new Map(BUYERS);for(const [sku,names] of grouped)mergedBuyers.set(sku,names.join(' / '));BUYERS=mergedBuyers;await kvSet('buyers',[...BUYERS]);let productsUpdated=0;if(hd>=0){const next=new Map(DB);for(let j=hi.idx+1;j<R.length;j++){const row=R[j]||[],sku=skuKey(row[hp]),desc=String(row[hd]??'').trim(),url=hu<0?'':String(row[hu]??'').trim();if(sku&&desc&&!desc.startsWith('*')){const old=next.get(sku)||{sku,desc:'',url:''};next.set(sku,{sku,desc:desc||old.desc||'',url:url||old.url||''});productsUpdated++}}if(productsUpdated){DB=next;await kvSet('db',[...DB])}}let updated=0,photos=0;const before=snap();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const key=skuKey(b.sku),buyer=BUYERS.get(key),product=DB.get(key);if(buyer&&!String(b.buyer||'').trim()){b.buyer=buyer;updated++}if(product&&!String(b.name||'').trim()&&product.desc){b.name=product.desc;updated++}if(product&&!String(b.img||'').trim()&&product.url){b.img=product.url;photos++}}));if(updated||photos){HIST.u.push(before);if(HIST.u.length>60)HIST.u.shift();HIST.r=[];HIST.o=null}save();render();dbLabel();status.textContent='Vínculos atualizados: '+grouped.size.toLocaleString('pt-BR')+' vínculos importados; '+BUYERS.size.toLocaleString('pt-BR')+' preservados no banco.'+(productsUpdated?' · '+productsUpdated+' linhas de produto processadas':'');toast('Importação concluída: '+grouped.size.toLocaleString('pt-BR')+' vínculos novos/atualizados; banco preservado. '+photos+' foto(s) vinculada(s).',7000);
+   const mergedBuyers=new Map(BUYERS);for(const [sku,names] of grouped)mergedBuyers.set(sku,names.join(' / '));BUYERS=mergedBuyers;await kvSet('buyers',[...BUYERS]);let productsUpdated=0;if(hd>=0){const next=new Map(DB);for(let j=hi.idx+1;j<R.length;j++){const row=R[j]||[],sku=skuKey(row[hp]),desc=String(row[hd]??'').trim(),url=hu<0?'':normalizeImageUrl(row[hu]);if(sku&&desc&&!desc.startsWith('*')){const old=next.get(sku)||{sku,desc:'',url:''};next.set(sku,{sku,desc:desc||old.desc||'',url:normalizeImageUrl(url)||normalizeImageUrl(old.url)||''});productsUpdated++}}if(productsUpdated){DB=next;await kvSet('db',[...DB])}}let updated=0,photos=0;const before=snap();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const key=skuKey(b.sku),buyer=BUYERS.get(key),product=DB.get(key);if(buyer&&!String(b.buyer||'').trim()){b.buyer=buyer;updated++}if(product&&!String(b.name||'').trim()&&product.desc){b.name=product.desc;updated++}if(product&&!normalizeImageUrl(b.img)&&normalizeImageUrl(product.url)){b.img=normalizeImageUrl(product.url);photos++}}));if(updated||photos){HIST.u.push(before);if(HIST.u.length>60)HIST.u.shift();HIST.r=[];HIST.o=null}save();render();dbLabel();status.textContent='Vínculos atualizados: '+grouped.size.toLocaleString('pt-BR')+' vínculos importados; '+BUYERS.size.toLocaleString('pt-BR')+' preservados no banco.'+(productsUpdated?' · '+productsUpdated+' linhas de produto processadas':'');toast('Importação concluída: '+grouped.size.toLocaleString('pt-BR')+' vínculos novos/atualizados; banco preservado. '+photos+' foto(s) vinculada(s).',7000);
   }catch(err){console.error('Erro ao importar compradores:',err);toast(err.message||'Falha ao importar a planilha de compradores.',7000)}
  },'btn');
  const search=el('input','',{placeholder:'Pesquisar por descrição do produto…'});search.style.cssText='width:100%;padding:10px;border:1px solid #d9dfee;border-radius:10px;margin:12px 0';
@@ -375,10 +393,10 @@ $('file').onchange=e=>{const f=e.target.files[0];if(!f)return;
    incoming.set(sku,{sku,desc:String(r[hd]??'').trim(),url:String(r[hu]??'').trim()});
   }
   if(!incoming.size){toast('A planilha não contém produtos válidos; o banco atual foi mantido.',7000);dbLabel();return}
-  const merged=new Map(DB);for(const [sku,item] of incoming){const old=merged.get(sku)||{sku,desc:'',url:''};merged.set(sku,{sku,desc:item.desc||old.desc||'',url:item.url||old.url||''})}DB=merged;
+  const merged=new Map(DB);for(const [sku,item] of incoming){const old=merged.get(sku)||{sku,desc:'',url:''};merged.set(sku,{sku,desc:item.desc||old.desc||'',url:normalizeImageUrl(item.url)||normalizeImageUrl(old.url)||''})}DB=merged;
   kvSet('db',[...DB]);dbLabel();
   // Completa campos vazios sem substituir alterações manuais.
-  let upd=0,photos=0;const hs0=snap();S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const d=DB.get(String(b.sku).trim().replace(/\.0+$/,''));if(!d)return;if(!b.name&&d.desc){b.name=d.desc;upd++}if(!b.img&&d.url){b.img=d.url;photos++}}));
+  let upd=0,photos=0;const hs0=snap();S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const d=DB.get(String(b.sku).trim().replace(/\.0+$/,''));if(!d)return;if(!b.name&&d.desc){b.name=d.desc;upd++}if(!normalizeImageUrl(b.img)&&normalizeImageUrl(d.url)){b.img=normalizeImageUrl(d.url);photos++}}));
   if(upd||photos){HIST.u.push(hs0);if(HIST.u.length>60)HIST.u.shift();HIST.r=[];HIST.o=null}
   save();render();toast('Planilha carregada: '+incoming.size.toLocaleString('pt-BR')+' linhas importadas; '+DB.size.toLocaleString('pt-BR')+' produtos preservados no banco; '+photos+' foto(s) vinculada(s).',7000)},30))};
 
@@ -400,7 +418,7 @@ $('xl').onclick=()=>{
        pi+1,bi+1,sku,
        String(b.name||db.desc||'').trim(),
        String(b.desc||'').trim(),buyer,
-       String(b.img||db.url||'').trim(),
+       normalizeImageUrl(b.img)||normalizeImageUrl(db.url)||'',
        Number(b.w||1),Number(b.h||1)
      ]);
      total++;
@@ -520,19 +538,16 @@ function block(p,b,i){
  const setProduct=u=>{const sk=String(u.sku||'').trim();let onde=null;
   S.pages.forEach((q,kk)=>q.blocks.forEach(x=>{if(x!==b&&x.type!=='txt'&&String(x.sku||'').trim()===sk&&!onde)onde=kk+2}));
   results.classList.remove('show');
-  act(()=>{b.sku=sk;if(!b.name)b.name=u.desc||'';b.img=u.url||b.img;if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)});
+  act(()=>{b.sku=sk;if(!b.name)b.name=u.desc||'';b.img=normalizeImageUrl(u.url)||normalizeImageUrl(b.img)||'';if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)});
   if(onde)toast('⚠ O SKU '+sk+' já está no guia (página '+onde+').',6000)};
  const search=()=>{const q=s.value.trim();results.innerHTML='';if(!q){results.classList.remove('show');return}
   const hits=findProducts(q);
   const ex=DB.get(q);if(ex){let more=false;for(const u of DB.values()){if(u!==ex&&String(u.sku).startsWith(q)){more=true;break}}if(!more){setProduct(ex);return}}
   for(const u of hits.list){
    const r=el('div','result'),thumb=el('div','result-thumb'),copy=el('div','result-copy');
-   const raw=String(u.url||'').trim().replace(/^['"\s]+|['"\s]+$/g,'');
-   const match=raw.match(/(?:https?:)?\/\/[^\s"';)]+/i);
-   let imageUrl=match?match[0]:raw;
-   if(imageUrl.startsWith('//'))imageUrl='https:'+imageUrl;
-   if(/^https?:\/\//i.test(imageUrl)||/^data:image\//i.test(imageUrl)){
-    const im=el('img','',{src:imageUrl,alt:'',draggable:false});
+   const imageUrl=normalizeImageUrl(u.url);
+   if(imageUrl){
+    const im=el('img','',{src:imageUrl,alt:'Foto do produto',draggable:false,loading:'lazy'});
     im.onerror=()=>{thumb.innerHTML='';thumb.textContent='▧'};thumb.append(im);
    }else thumb.textContent='▧';
    copy.append(el('b','',{textContent:u.desc||'Sem descrição'}),el('small','',{textContent:'SKU: '+u.sku}));r.append(thumb,copy);
@@ -542,7 +557,7 @@ function block(p,b,i){
   else if(hits.total>hits.list.length)results.append(el('div','nores',{textContent:'Mostrando '+hits.list.length+' de '+hits.total.toLocaleString('pt-BR')+' — continue digitando para refinar'}));
   results.classList.add('show')};
  s.oninput=search;s.onkeydown=e=>{if(e.key==='Enter'){const x=DB.get(s.value.trim());if(x)setProduct(x);else{const h=findProducts(s.value,1).list[0];if(h)setProduct(h)}}};
- const show=()=>{ph.innerHTML='';if(b.img){const im=el('img','',{src:b.img,draggable:false});im.onerror=()=>{ph.innerHTML='<span>Imagem indisponível<br>confira a URL ou escolha uma foto</span>'};ph.append(im);return}if(!b.sku){ph.innerHTML='<span>digite o SKU<br>ou busque pela descrição</span>';return}const u=DB.get(String(b.sku).trim());if(!u){ph.textContent=DB.size?'SKU não encontrado':'carregue a planilha';return}let url=String(u.url||'').trim().replace(/^['\"\s]+|['\"\s]+$/g,'');const m=url.match(/(?:https?:)?\/\/[^\s"';)]+/i);url=(m?m[0]:url).trim();if(url.startsWith('//'))url='https:'+url;if(!url){ph.innerHTML='<span>Sem foto na base<br>adicione uma URL ou escolha uma foto</span>';return}const im=el('img','',{src:url,draggable:false});im.onerror=()=>{ph.innerHTML='<span>Imagem indisponível<br>confira a URL ou escolha uma foto</span>'};ph.append(im)};
+ const show=()=>{ph.innerHTML='';const url=normalizeImageUrl(b.img)||normalizeImageUrl(DB.get(String(b.sku||'').trim())?.url);if(!url){ph.innerHTML='<span>Sem foto válida na base<br>confira a URL ou escolha uma foto</span>';return}const im=el('img','',{src:url,draggable:false,loading:'lazy'});im.onerror=()=>{ph.innerHTML='<span>Não foi possível carregar esta imagem.<br>O link pode não ser público ou não apontar direto para uma foto.</span>'};ph.append(im)};
  const buyerTag=el('div','buyerTag',{title:'Comprador responsável'});
  if(b.buyer){const bt=el('span','',{textContent:'Comprador: '+b.buyer});bt.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';buyerTag.append(bt)}
  const editBuyer=el('button','buyerEdit',{textContent:'✎',title:'Editar comprador',type:'button'});editBuyer.onclick=e=>{e.preventDefault();e.stopPropagation();ask({title:'Editar comprador',text:'Informe o nome ou código do comprador responsável por este produto.',input:1,value:b.buyer||'',ok:'Salvar',ph:'Nome ou código do comprador'}).then(v=>{if(v===null)return;act(()=>{b.buyer=String(v).trim()})})};buyerTag.append(editBuyer);
