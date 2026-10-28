@@ -229,19 +229,19 @@ button:disabled{opacity:.38!important;cursor:not-allowed!important;transform:non
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 const firebaseConfig = {
-  apiKey: "AIzaSyBhI-ufthYvwO-DNdErFXv88tYj1COY6mU",
-  authDomain: "guias-de-compras.firebaseapp.com",
-  projectId: "guias-de-compras",
-  storageBucket: "guias-de-compras.firebasestorage.app",
-  messagingSenderId: "132230119433",
-  appId: "1:132230119433:web:4fe4881f05f414742fb8d8",
-  measurementId: "G-274FMW0QN3"
+  apiKey: "AIzaSyAfcYuHzuNlG72Uv38FVVC3P_8icoC2Pak",
+  authDomain: "guia-de-compras-44349.firebaseapp.com",
+  databaseURL: "https://guia-de-compras-44349-default-rtdb.firebaseio.com",
+  projectId: "guia-de-compras-44349",
+  storageBucket: "guia-de-compras-44349.firebasestorage.app",
+  messagingSenderId: "879592441788",
+  appId: "1:879592441788:web:5f7ddc02801aecdeb64db9"
 };
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
-const cloudDb = getFirestore(firebaseApp);
+const cloudDb = getDatabase(firebaseApp);
 let authReadyResolve;
 const authReady = new Promise(resolve => { authReadyResolve = resolve; });
 const gate = document.getElementById('authGate');
@@ -276,15 +276,16 @@ let S=null;
 const newPage=()=>({title:'seção',rows:4,blocks:[]});
 const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:'',buyer:''});
 const newText=()=>({type:'txt',w:1,h:2,text:'',bg:'#fbe4ee',fs:11,dir:'h'});
-// O estado do Guia é salvo no Firestore para ficar compartilhado entre os computadores autorizados.
+// O estado do Guia é salvo no Realtime Database para ficar compartilhado entre os computadores autorizados.
 // Cache local durável: protege os dados caso a rede/Firebase falhe durante uma atualização.
 let cacheDbPromise;
 function openCacheDb(){if(!cacheDbPromise)cacheDbPromise=new Promise((resolve,reject)=>{const req=indexedDB.open('guia-cache-v1',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('kv'))req.result.createObjectStore('kv')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});return cacheDbPromise}
 async function cacheGet(k){try{const d=await openCacheDb();return await new Promise((resolve,reject)=>{const tx=d.transaction('kv','readonly'),r=tx.objectStore('kv').get(String(k));r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}catch(e){console.warn('Cache local indisponível:',e);return undefined}}
 async function cacheSet(k,v){try{const d=await openCacheDb();await new Promise((resolve,reject)=>{const tx=d.transaction('kv','readwrite');tx.objectStore('kv').put(v,String(k));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}catch(e){console.error('Não foi possível gravar o cache local:',e)}}
 const hasUsefulData=v=>{if(v==null)return false;if(Array.isArray(v))return v.length>0;if(v instanceof Map)return v.size>0;if(typeof v==='object')return Array.isArray(v.list)?v.list.length>0:(Array.isArray(v.pages)?v.pages.some(p=>(p.blocks||[]).length>0)||!!(v.cover&&v.cover.title):Object.keys(v).length>0);return !!v};
-const kvGet=async k=>{await authReady;const cached=await cacheGet(k);try{const snap=await getDoc(doc(cloudDb,'appdata',String(k)));if(snap.exists()){const value=snap.data().value;/* Nunca deixa um documento vazio da nuvem apagar uma cópia local que contém dados. */if(hasUsefulData(cached)&&!hasUsefulData(value)){console.warn('Documento vazio na nuvem; preservando dados locais:',k);try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Dados locais preservados; restauração na nuvem pendente:',e)}return cached}await cacheSet(k,value);return value}if(cached!==undefined){console.warn('Documento ausente no Firebase; recuperando cache local:',k);try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Cache preservado localmente; restauração na nuvem pendente:',e)}return cached}return undefined}catch(e){console.error('Falha ao ler dados do Guia; tentando cache local:',e);return cached}};
-const kvSet=async (k,v)=>{await cacheSet(k,v);await authReady;try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia na nuvem:',e);const msg=(e&&e.code==='permission-denied')?'Dados guardados neste navegador, mas sem permissão para sincronizar com a nuvem. Confira as regras do Firestore.':'Dados guardados neste navegador; falhou a sincronização com a nuvem. Não limpe os dados do navegador.';if(typeof toast==='function')toast(msg,6500);else console.warn(msg);}};
+const cloudRef=k=>ref(cloudDb,'appdata/'+String(k));
+const kvGet=async k=>{await authReady;const cached=await cacheGet(k);try{const snap=await get(cloudRef(k));if(snap.exists()){const record=snap.val();const value=record&&Object.prototype.hasOwnProperty.call(record,'value')?record.value:record;/* Nunca deixa um documento vazio da nuvem apagar uma cópia local que contém dados. */if(hasUsefulData(cached)&&!hasUsefulData(value)){console.warn('Registro vazio na nuvem; preservando dados locais:',k);try{await set(cloudRef(k),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Dados locais preservados; restauração na nuvem pendente:',e)}return cached}await cacheSet(k,value);return value}if(cached!==undefined){console.warn('Registro ausente no Firebase; recuperando cache local:',k);try{await set(cloudRef(k),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Cache preservado localmente; restauração na nuvem pendente:',e)}return cached}return undefined}catch(e){console.error('Falha ao ler dados do Guia; tentando cache local:',e);return cached}};
+const kvSet=async (k,v)=>{await cacheSet(k,v);await authReady;try{await set(cloudRef(k),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia na nuvem:',e);const msg=(e&&e.code==='PERMISSION_DENIED')?'Dados guardados neste navegador, mas sem permissão para sincronizar com a nuvem. Confira as regras do Realtime Database.':'Dados guardados neste navegador; falhou a sincronização com a nuvem. Não limpe os dados do navegador.';if(typeof toast==='function')toast(msg,6500);else console.warn(msg);}};
 const norm=()=>{if(!S.cover)S.cover=fresh().cover;if(!S.pages||!S.pages.length)S.pages=[newPage(),newPage()];
  S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}}))};
 const meta=()=>{const m=LIB.list.find(x=>x.id==ID);if(m){m.pages=S.pages.length+1;m.prods=S.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.type!='txt'&&(b.sku||b.img||b.name)).length,0);m.c1=S.cover.c1;m.c2=S.cover.c2}};
@@ -682,13 +683,13 @@ addEventListener('beforeunload',()=>{if(S){clearTimeout(flush.t);flush()}});addE
 async function migrateLocalIfCloudEmpty(){
  await authReady;
  try {
-  const cloudLib=await getDoc(doc(cloudDb,'appdata','lib'));
+  const cloudLib=await get(ref(cloudDb,'appdata/lib'));
   if(cloudLib.exists()) return;
   const localDb=await new Promise((resolve,reject)=>{const req=indexedDB.open('guia5',1);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
   if(!localDb.objectStoreNames.contains('kv')) return;
   const entries=await new Promise((resolve,reject)=>{const tx=localDb.transaction('kv','readonly'),store=tx.objectStore('kv'),keysReq=store.getAllKeys(),valsReq=store.getAll();tx.oncomplete=()=>resolve(keysReq.result.map((k,i)=>[k,valsReq.result[i]]));tx.onerror=()=>reject(tx.error)});
-  for(const [key,value] of entries){await setDoc(doc(cloudDb,'appdata',String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
-  if(entries.length) console.info('Dados locais migrados para o Firestore:',entries.length);
+  for(const [key,value] of entries){await set(ref(cloudDb,'appdata/'+String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
+  if(entries.length) console.info('Dados locais migrados para o Realtime Database:',entries.length);
  } catch(e){console.warn('Migração local não executada:',e)}
 }
 migrateLocalIfCloudEmpty().then(()=>Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db'),kvGet('buyers')])).then(async([lb,pj,db,buy])=>{
