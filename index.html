@@ -286,8 +286,8 @@ const hasUsefulData=v=>{if(v==null)return false;if(Array.isArray(v))return v.len
 const cloudRef=k=>ref(cloudDb,'appdata/'+String(k));
 const kvGet=async k=>{await authReady;const cached=await cacheGet(k);try{const snap=await get(cloudRef(k));if(snap.exists()){const record=snap.val();const value=record&&Object.prototype.hasOwnProperty.call(record,'value')?record.value:record;/* Nunca deixa um documento vazio da nuvem apagar uma cópia local que contém dados. */if(hasUsefulData(cached)&&!hasUsefulData(value)){console.warn('Registro vazio na nuvem; preservando dados locais:',k);try{await set(cloudRef(k),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Dados locais preservados; restauração na nuvem pendente:',e)}return cached}await cacheSet(k,value);return value}if(cached!==undefined){console.warn('Registro ausente no Firebase; recuperando cache local:',k);try{await set(cloudRef(k),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Cache preservado localmente; restauração na nuvem pendente:',e)}return cached}return undefined}catch(e){console.error('Falha ao ler dados do Guia; tentando cache local:',e);return cached}};
 const kvSet=async (k,v)=>{await cacheSet(k,v);await authReady;try{await set(cloudRef(k),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia na nuvem:',e);const msg=(e&&e.code==='PERMISSION_DENIED')?'Dados guardados neste navegador, mas sem permissão para sincronizar com a nuvem. Confira as regras do Realtime Database.':'Dados guardados neste navegador; falhou a sincronização com a nuvem. Não limpe os dados do navegador.';if(typeof toast==='function')toast(msg,6500);else console.warn(msg);}};
-const norm=()=>{if(!S.cover)S.cover=fresh().cover;if(!S.pages||!S.pages.length)S.pages=[newPage(),newPage()];
- S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}}))};
+const norm=()=>{if(!S||typeof S!=='object')throw new Error('Guia inválido');if(!S.cover)S.cover=fresh().cover;if(!Array.isArray(S.pages)||!S.pages.length)S.pages=[newPage(),newPage()];
+ S.pages.forEach(p=>{if(!Array.isArray(p.blocks))p.blocks=[];p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}})});};
 const meta=()=>{const m=LIB.list.find(x=>x.id==ID);if(m){m.pages=S.pages.length+1;m.prods=S.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.type!='txt'&&(b.sku||b.img||b.name)).length,0);m.c1=S.cover.c1;m.c2=S.cover.c2}};
 const flush=async()=>{clearTimeout(flush.t);if(!ID||!LIB.list.some(x=>x.id==ID))return;meta();await Promise.all([kvSet('g:'+ID,S),kvSet('lib',LIB)])};
 const save=()=>{clearTimeout(flush.t);/* Grava primeiro no cache local para reduzir perda ao recarregar rapidamente. */if(ID&&S){cacheSet('g:'+ID,S);cacheSet('lib',LIB)}flush.t=setTimeout(flush,400)};
@@ -717,10 +717,37 @@ async function migrateLocalIfCloudEmpty(){
  await migrateStore('guia-cache-v1');
  if(migrated.length) console.info('Registros locais ausentes restaurados para o Realtime Database:',[...new Set(migrated)]);
 }
-migrateLocalIfCloudEmpty().then(()=>Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db'),kvGet('buyers')])).then(async([lb,pj,db,buy])=>{
- if(db){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}let removed=0;for(const [k,v] of DB){if(String((v&&v.desc)||'').trim().startsWith('*')){DB.delete(k);removed++}}if(removed)await kvSet('db',[...DB])}
- if(buy)BUYERS=new Map(buy);
- if(lb&&lb.list&&lb.list.length){LIB=lb;ID=LIB.list.some(x=>x.id==LIB.cur)?LIB.cur:LIB.list[0].id;S=await kvGet('g:'+ID)||fresh()}
- else{ID='g1';S=pj&&pj.pages?pj:fresh();LIB={list:[{id:ID,name:(S.cover&&S.cover.title)||'Meu guia'}],cur:ID}}
- norm();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));flush();dbLabel();animate();render()});
+async function initializeGuide(){
+ try{
+  await authReady;
+  try{await migrateLocalIfCloudEmpty()}catch(e){console.warn('Migração ignorada; continuando carregamento:',e)}
+  const [lb,pj,db,buy]=await Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db'),kvGet('buyers')]);
+  if(Array.isArray(db)){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}}
+  if(Array.isArray(buy))BUYERS=new Map(buy);
+  if(lb&&Array.isArray(lb.list)&&lb.list.length){
+   LIB=lb;ID=LIB.list.some(x=>x.id===LIB.cur)?LIB.cur:LIB.list[0].id;
+   const saved=await kvGet('g:'+ID);
+   if(!saved||!Array.isArray(saved.pages))throw new Error('O guia '+ID+' não pôde ser carregado. Nenhum dado foi substituído.');
+   S=saved;
+  }else if(pj&&Array.isArray(pj.pages)){
+   ID='g1';S=pj;LIB={list:[{id:ID,name:(S.cover&&S.cover.title)||'Meu guia'}],cur:ID};
+  }else{
+   throw new Error('Biblioteca não disponível. Para proteger seus dados, nenhum guia vazio foi criado.');
+  }
+  norm();
+  S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));
+  dbLabel();animate();render();
+ }catch(e){
+  console.error('Falha ao iniciar o Guia de Compras:',e);
+  const panel=document.createElement('div');
+  panel.style.cssText='position:fixed;inset:0;z-index:9999;background:#f3f6fc;display:flex;align-items:center;justify-content:center;padding:20px;font:15px system-ui';
+  const card=document.createElement('div');card.style.cssText='max-width:540px;background:white;padding:28px;border-radius:18px;box-shadow:0 12px 40px #1232';
+  const title=document.createElement('h2');title.textContent='Não foi possível carregar o Guia';
+  const msg=document.createElement('p');msg.textContent=String(e.message||e);
+  const help=document.createElement('p');help.textContent='Seus dados não foram apagados nem substituídos. Verifique a conexão, as permissões do Firebase e tente novamente.';
+  const btn=document.createElement('button');btn.textContent='Tentar novamente';btn.onclick=()=>location.reload();
+  card.append(title,msg,help,btn);panel.append(card);document.body.append(panel);
+ }
+}
+initializeGuide();
 </script></body></html>
