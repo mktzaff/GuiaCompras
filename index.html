@@ -50,7 +50,7 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
 .box.sm input,.box.sm textarea{width:100%;margin:6px 0 14px;padding:10px 12px;border:1px solid #d9dfee;border-radius:10px;font:inherit}.box.sm textarea{height:160px;resize:vertical}
 .rw{display:flex;gap:8px;justify-content:flex-end}.dgr{background:#e5484d!important;box-shadow:0 4px 14px #e5484d55!important}
 .box{background:#fff;border-radius:22px;padding:24px;width:min(880px,100%);max-height:88vh;overflow:auto;animation:pop .35s var(--e) both;box-shadow:0 30px 80px #0007}
-.box h2{margin:0 0 16px}.box>button{margin:0 8px 8px 0}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.box h2{margin:0 0 16px}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
 .card{border-radius:16px;background:#f6f8fc;overflow:hidden;cursor:pointer;transition:all .25s var(--e);animation:pop .4s both}
 .card:hover{transform:translateY(-4px);box-shadow:0 14px 30px #1e243322}.card.cur{outline:3px solid var(--ui)}
 .card .th{height:90px;display:grid;place-items:center;color:#fff;font:700 15px Georgia,serif;padding:8px;text-align:center}
@@ -80,8 +80,8 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
 .blk.txt{border:0;margin:1.5mm;border-radius:4mm;padding:6mm;justify-content:center;font-size:11pt;line-height:1.45}
 .txt.vertical{writing-mode:vertical-rl;align-items:center}
 .t{outline:none;white-space:pre-wrap}
-.nm{font-weight:700;font-size:10pt;line-height:1.2;outline:none;white-space:pre-wrap}
-.ds{font-size:8pt;line-height:1.25;color:#444;outline:none;margin-top:.8mm;white-space:pre-wrap}.buyerTag{display:flex;align-items:center;gap:3px;font-size:6.5pt;line-height:1.1;color:#8a92a8;min-height:0;margin-top:.5mm;white-space:nowrap;min-width:0;overflow:hidden}.buyerTag span{flex:1}.buyerEdit{flex:none;border:0;background:transparent;color:#8a92a8;padding:0 2px;font:10px/1 system-ui;cursor:pointer}.buyerEdit:hover{color:var(--ui)}@media print{.buyerEdit{display:none}.buyerTag{color:#777;font-size:6pt}}
+.nm{font-weight:700;font-size:10pt;line-height:1.2;outline:none}
+.ds{font-size:8pt;line-height:1.25;color:#444;outline:none;margin-top:.8mm}
 [data-p]:empty:before{content:attr(data-p);opacity:.35;font-weight:400}
 .searchbox{position:relative;display:block;width:100%;z-index:8}.searchbox .sku{width:100%;box-sizing:border-box}.results{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #d9dfee;border-radius:10px;box-shadow:0 12px 30px #0002;max-height:280px;overflow:auto;display:none;z-index:20}.results.show{display:block}.result{padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f1f5;line-height:1.25}.result:last-child{border-bottom:0}.result:hover{background:#eef3ff}.result b{display:block;font-size:12px}.result small{display:block;color:#68708a;font-size:10px;margin-top:2px}.nores{padding:10px;color:#8a92a8;font-size:11px}
 .ph{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;text-align:center;padding-top:1.5mm}
@@ -90,32 +90,117 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
 .cover{color:#fff;align-items:center;justify-content:center;text-align:center;padding:25mm}
 .cover .frame{position:absolute;inset:10mm;border:.4mm solid #fff8;pointer-events:none}
 .cover h1{font:700 58pt Georgia,serif;line-height:1.05;margin:0;width:100%;text-shadow:0 2px 14px #0004;position:relative}
-.cover h1 div{outline:none;white-space:pre-wrap}
+.cover h1 div{outline:none}
 .cover .rule{width:30mm;height:.6mm;background:#fff;margin:9mm auto;position:relative}
-.cover .sub{font:300 15pt "Segoe UI",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;width:100%;line-height:1.6;outline:none;position:relative;white-space:pre-wrap}
+.cover .sub{font:300 15pt "Segoe UI",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;width:100%;line-height:1.6;outline:none;position:relative}
+
+/* Organização das páginas e adaptação de tela */
+.it.page-item{position:relative;padding-left:30px;cursor:grab;border:1px solid transparent;user-select:none}
+.it.page-item:before{content:"⠿";position:absolute;left:10px;top:11px;color:#9aa3b8;font-size:17px;line-height:1}
+.it.page-item.drag-page{opacity:.45;background:#eaf0ff;border:1px dashed var(--ui)}
+.it.page-item.drop-page{box-shadow:inset 0 3px 0 var(--ui);background:#f2f5ff}
+.it.page-item:active{cursor:grabbing}
+#side .add{position:sticky;bottom:0;background:#fff;z-index:2}
+@media(max-width:1100px){
+ #app{grid-template-columns:175px minmax(0,1fr);gap:10px;padding:10px}
+ #insp{position:fixed;right:12px;top:70px;bottom:12px;width:250px;z-index:8;box-shadow:0 12px 40px #1e243344}
+ body.foc #app{grid-template-columns:0 minmax(0,1fr)}
+}
+@media(max-width:700px){
+ body{height:100dvh;grid-template-rows:auto minmax(0,1fr)}
+ #top{padding:8px;gap:5px;flex-wrap:wrap;min-height:58px}
+ .brand{font-size:14px;padding:4px 6px}
+ #top button{padding:7px 9px;font-size:12px}
+ #app{display:flex;flex-direction:column;gap:8px;padding:8px;min-height:0;overflow:hidden}
+ #side{flex:none;max-height:122px;border-radius:12px;padding:8px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden}
+ #side .it{flex:none;min-width:120px;max-width:180px;margin:0;padding:8px 10px 8px 28px}
+ #side .it.page-item:before{left:8px;top:9px}
+ #side .add{flex:none;width:auto;white-space:nowrap;margin:0;padding:8px 12px;position:static}
+ #main{flex:1;min-height:0}
+ #view{padding:10px 8px 90px}
+ #stage{margin:0 auto}
+ #insp{top:auto;right:8px;left:8px;bottom:8px;width:auto;max-height:45dvh;padding:12px;border-radius:14px}
+ body.foc #app{display:flex}
+ body.foc #side{display:none}
+ #dock{bottom:8px;max-width:calc(100vw - 16px);overflow-x:auto;gap:0;padding:4px;border-radius:14px}
+ #dock button{padding:7px 9px;font-size:12px}
+ .box{padding:16px;border-radius:16px}
+ .cards{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+ #modal,#dlg{padding:12px}
+}
+
 @media print{
  body{display:block;height:auto;overflow:visible;background:none}
  #top,#side,#insp,#dock,#toast,#modal,#dlg,.hd,.sku,.dupb{display:none!important}
  #app,#main,#view{display:block;padding:0;overflow:visible;height:auto}#stage{display:block!important;zoom:1!important;filter:none}
  .page{display:flex!important;break-after:page;animation:none!important;box-shadow:none!important}.blk{cursor:auto;animation:none!important;box-shadow:none!important;transform:none!important}
- *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
- [data-p]:empty:before{content:none!important}.ph.empty{visibility:hidden}.results{display:none!important}.page:last-child{break-after:auto}}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 @page{size:A4;margin:0}
+
+/* Revisão visual e ergonomia */
+:root{--ui:#3f5ee8;--ui2:#7656e8;--line:#e3e8f2;--ink:#1f293b}
+body{color:var(--ink);background:radial-gradient(900px 450px at 5% 0,#e2e9ff 0,#0000 72%),#edf1f8}
+#top{border-bottom:1px solid #e8ecf4;box-shadow:0 4px 18px #1e24330b}
+#side,#insp{border:1px solid #e3e8f1;box-shadow:0 8px 28px #22345c0b}
+#side{padding:12px}
+.sidehead{display:flex;align-items:center;justify-content:space-between;padding:3px 5px 12px;color:#7b849b;font-size:10px;letter-spacing:.12em}
+.page-count{display:grid;place-items:center;min-width:23px;height:23px;padding:0 6px;border-radius:8px;background:#eef2ff;color:#5268c9;font-size:11px;letter-spacing:0;font-weight:700}
+.it.page-item{border-radius:12px}
+.it.page-item b{font-size:13px;line-height:1.25}
+.it.page-item small{font-size:11px;line-height:1.35;margin-top:3px}
+.it.page-item.on{background:#edf1ff;box-shadow:inset 3px 0 0 var(--ui)}
+.it.page-item.drop-page{box-shadow:inset 0 3px 0 var(--ui),0 4px 10px #3f5ee81f}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[contenteditable=true]:focus-visible{outline:2px solid #7e91f2;outline-offset:2px}
+button:disabled{opacity:.38!important;cursor:not-allowed!important;transform:none!important;box-shadow:none!important}
+#dock{border:1px solid #ffffff1e;box-shadow:0 14px 38px #10182b42}
+#view{scrollbar-gutter:stable}
+.cover h1 [data-p]:empty:before{opacity:.68}
+.cover .sub[data-p]:empty:before{opacity:.62}
+#insp .row{margin:12px 0}
+#insp .row label{letter-spacing:.01em}
+@media(max-width:1100px) and (min-width:701px){
+ #app{grid-template-columns:175px minmax(0,1fr) 225px;gap:10px;padding:10px}
+ #insp{position:static;right:auto;top:auto;bottom:auto;width:auto;z-index:auto}
+ #dock{max-width:calc(100% - 12px);overflow-x:auto;scrollbar-width:none}
+ #dock button{padding:7px 9px;font-size:12px}
+ body.foc #app{grid-template-columns:0 minmax(0,1fr) 225px}
+}
+@media(max-width:700px){
+ body{height:100dvh;grid-template-rows:auto minmax(0,1fr);overflow:hidden}
+ #top{padding:7px 8px;gap:5px;min-height:58px}
+ #app{display:flex;flex-direction:column;gap:7px;padding:7px;min-height:0;overflow:hidden}
+ #side{order:1;flex:none;max-height:84px;min-height:66px;border-radius:13px;padding:7px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+ #side .sidehead{display:none}
+ #side .it{flex:none;min-width:126px;max-width:190px;margin:0;padding:8px 9px 8px 28px}
+ #side .it.page-item:before{left:8px;top:9px}
+ #side .add{flex:none;width:auto;white-space:nowrap;margin:0;padding:8px 12px;position:static}
+ #insp{order:2;position:static;inset:auto;right:auto;bottom:auto;left:auto;z-index:auto;width:auto;flex:none;max-height:23dvh;min-height:0;overflow:auto;border-radius:13px;padding:10px 12px;box-shadow:0 4px 18px #1e24330b}
+ #insp>*{animation:none}
+ #insp h3{font-size:14px;margin:0 0 3px}
+ #insp p{font-size:12px;margin:3px 0 7px}
+ #insp .row{margin:8px 0}
+ #insp .btn{margin-bottom:4px;padding:8px 10px}
+ #main{order:3;flex:1;min-height:0;width:100%}
+ #view{padding:6px 4px 48px;scrollbar-width:thin}
+ #stage{margin:0 auto}
+ #dock{bottom:5px;max-width:calc(100% - 8px);gap:0;padding:4px;border-radius:13px;overflow-x:auto;scrollbar-width:none;z-index:20}
+ #dock button{padding:7px 8px;font-size:11px}
+ #dock .vs{margin:0 2px}
+ body.foc #app{display:flex}
+ body.foc #side{display:flex!important;opacity:1!important;pointer-events:auto!important;padding:7px!important}
+ body.foc #side .it{display:flex}
+ .box{padding:15px;border-radius:15px;max-height:90dvh}
+ .cards{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:9px}
+ #modal,#dlg{padding:10px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
 </style></head><body>
-<div id="authGate" style="position:fixed;inset:0;z-index:99999;background:#f4f6fa;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;padding:20px">
- <form id="authForm" style="width:min(420px,100%);background:#fff;border:1px solid #dce2ea;border-radius:18px;padding:28px;box-shadow:0 18px 55px #10203020;color:#182230">
-  <div style="font-size:30px;margin-bottom:8px">📖</div><h2 style="margin:0 0 6px">Guia de Compras</h2><p style="margin:0 0 20px;color:#586779">Acesso restrito à equipe autorizada.</p>
-  <label for="authEmail" style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">E-mail</label><input id="authEmail" type="email" autocomplete="username" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit">
-  <label for="authPassword" style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">Senha</label><input id="authPassword" type="password" autocomplete="current-password" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit">
-  <button id="authSubmit" type="submit" style="margin-top:18px;width:100%;padding:12px;border:0;border-radius:9px;background:#1769d2;color:#fff;font:600 15px system-ui;cursor:pointer">Entrar</button>
-  <p id="authError" role="alert" style="color:#b42318;font-size:13px;min-height:18px;margin-bottom:0"></p>
- </form>
-</div>
 <div id="top">
  <button class="brand" id="lib" title="Abrir biblioteca de guias"><span class="logo">📖</span>Guia de Compras <small id="gn"></small> ▾</button>
  <input type="file" id="file" hidden accept=".xlsx,.xls,.csv">
  <button id="un" title="Desfazer (Ctrl+Z)">↶</button><button id="re" title="Refazer (Ctrl+Y)">↷</button>
- <button id="dbm">🗄 Banco</button><button id="xl">⬇ Excel</button><button class="pri" id="pdf">⬇ PDF</button>
+ <button id="bx">📊 Planilha</button><button id="xl">⬇ Excel</button><button class="pri" id="pdf">⬇ PDF</button>
 </div>
 <div id="app">
  <div id="side"></div>
@@ -123,106 +208,23 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
  <div id="insp"></div>
 </div>
 <div id="toast"></div><div id="modal"></div><div id="dlg"></div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { initializeFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyBhI-ufthYvwO-DNdErFXv88tYj1COY6mU",
-  authDomain: "guias-de-compras.firebaseapp.com",
-  projectId: "guias-de-compras",
-  storageBucket: "guias-de-compras.firebasestorage.app",
-  messagingSenderId: "132230119433",
-  appId: "1:132230119433:web:4fe4881f05f414742fb8d8",
-  measurementId: "G-274FMW0QN3"
-};
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
-const cloudDb = initializeFirestore(firebaseApp, { ignoreUndefinedProperties: true });
-let authReadyResolve;
-const authReady = new Promise(resolve => { authReadyResolve = resolve; });
-const gate = document.getElementById('authGate');
-const authForm = document.getElementById('authForm');
-const authError = document.getElementById('authError');
-let signedUser = null;
-onAuthStateChanged(auth, user => {
-  if (user) {
-    signedUser = user;
-    gate.style.display = 'none';
-    authReadyResolve(user);
-  } else {
-    signedUser = null;
-    gate.style.display = 'flex';
-  }
-});
-authForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const btn = document.getElementById('authSubmit');
-  btn.disabled = true; btn.textContent = 'Entrando…'; authError.textContent = '';
-  try {
-    await signInWithEmailAndPassword(auth, document.getElementById('authEmail').value.trim(), document.getElementById('authPassword').value);
-  } catch (err) {
-    authError.textContent = 'Não foi possível entrar. Confere o e-mail e a senha e tenta novamente.';
-  } finally { btn.disabled = false; btn.textContent = 'Entrar'; }
-});
+<script>
 const $=id=>document.getElementById(id);
 const el=(t,c,p)=>{const e=document.createElement(t);if(c)e.className=c;if(p)Object.assign(e,p);return e};
-let DB=new Map(),BUYERS=new Map(),NEW=null,CUR=0,SEL=null,Z=1,FOCUS=false,auto=true,ID='',LIB={list:[],cur:''};
+let DB=new Map(),NEW=null,CUR=0,SEL=null,Z=1,FOCUS=false,auto=true,ID='',LIB={list:[],cur:''};
 const fresh=()=>({cover:{title:'',sub:'',c1:'#1a8fe3',c2:'#0b3d6b',img:''},pages:[newPage(),newPage()]});
 let S=null;
 const newPage=()=>({title:'seção',rows:4,blocks:[]});
-const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:'',buyer:''});
+const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:''});
 const newText=()=>({type:'txt',w:1,h:2,text:'',bg:'#fbe4ee',fs:11,dir:'h'});
-// O estado do Guia é salvo no Firestore para ficar compartilhado entre os computadores autorizados.
-// Bancos grandes são divididos em documentos menores para respeitar o limite de 1 MiB do Firestore.
-const bankKeys=new Set(['db','buyers']);
-const FAIL=Symbol('falha-ao-ler');
-const readDocValue=async key=>{const snap=await getDoc(doc(cloudDb,'appdata',String(key)));return snap.exists()?snap.data().value:undefined};
-// kvGet devolve undefined quando o dado NÃO EXISTE e FAIL quando a leitura DEU ERRO (rede, permissão...).
-// Quem chama nunca pode tratar FAIL como "vazio": senão um guia em branco sobrescreve o guia real no banco.
-const kvGet=async k=>{await authReady;try{
- if(bankKeys.has(String(k))){
-  const meta=await readDocValue(String(k)+'__meta');
-  if(meta&&meta.version&&Number.isInteger(meta.count)){
-   const parts=await Promise.all(Array.from({length:meta.count},(_,i)=>readDocValue(String(k)+'__'+meta.version+'__'+i)));
-   const all=[];
-   parts.forEach((part,i)=>{if(!Array.isArray(part))throw new Error('Parte ausente do banco '+k+' ('+i+')');all.push(...part)});
-   // Firestore não aceita arrays aninhados; reconstitui os pares [chave, valor] no navegador.
-   return all.map(item=>Array.isArray(item)?item:(k==='db'?[item.sku,item.product]:[item.sku,item.buyer]));
-  }
- }
- return await readDocValue(k);
- }catch(e){console.error('Falha ao ler dados do Guia:',e);if(typeof toast==='function')toast('Não foi possível carregar '+(k==='db'?'o banco de produtos':k==='buyers'?'os vínculos de compradores':'os dados')+'. Confira a conexão e o Firebase.',7000);return FAIL}};
-const kvSet=async (k,v)=>{await authReady;try{
- const stamp=new Date().toISOString(), user=signedUser?.uid||'';
- if(bankKeys.has(String(k))&&Array.isArray(v)){
-  const key=String(k),version=Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8), size=250;
-  // Serializa cada par como objeto simples: Firestore rejeita arrays aninhados (invalid-argument).
-  const serial=v.map(pair=>Array.isArray(pair)?(key==='db'?{sku:String(pair[0]),product:pair[1]}:{sku:String(pair[0]),buyer:pair[1]}):pair);
-  const count=Math.ceil(serial.length/size);
-  let old=null;try{old=await readDocValue(key+'__meta')}catch(_){}
-  await Promise.all(Array.from({length:count},(_,i)=>setDoc(doc(cloudDb,'appdata',key+'__'+version+'__'+i),{value:serial.slice(i*size,(i+1)*size),updatedAt:stamp,updatedBy:user})));
-  await setDoc(doc(cloudDb,'appdata',key+'__meta'),{value:{version,count,length:serial.length},updatedAt:stamp,updatedBy:user});
-  // Só depois de gravar a versão nova apaga os pedaços da versão antiga (antes eles ficavam órfãos e acumulavam).
-  if(old&&old.version&&old.version!==version&&Number.isInteger(old.count))for(let i=0;i<old.count;i++)deleteDoc(doc(cloudDb,'appdata',key+'__'+old.version+'__'+i)).catch(()=>{});
- }else await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:stamp,updatedBy:user});
- return true;
- }catch(e){console.error('Falha ao salvar dados do Guia:',e);const code=e?.code||'erro-desconhecido';
-  const msg=(code==='permission-denied')?'Sem permissão para salvar no banco. Confira as regras do Firestore e o UID da conta.'
-   :(code==='invalid-argument'&&/size|bytes|longer|exceed/i.test(e?.message||''))?'Este guia ficou grande demais para o banco (limite de ~1 MB). Troque fotos escolhidas à mão por fotos da planilha ou divida o guia.'
-   :(code==='resource-exhausted')?'Limite diário de gravações do Firebase atingido. As alterações não foram salvas; tente de novo mais tarde.'
-   :'Falha ao salvar no Firebase ('+code+'). Os dados podem não ter sido gravados; confira a conexão e o Console.';
-  if(typeof toast==='function')toast(msg,8000);else console.warn(msg);return false;}};
+const idb=new Promise((res,rej)=>{try{const r=indexedDB.open('guia5',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});
+const kvGet=k=>idb.then(d=>new Promise(r=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})).catch(()=>{});
+const kvSet=(k,v)=>idb.then(d=>{d.transaction('kv','readwrite').objectStore('kv').put(v,k)}).catch(()=>{});
 const norm=()=>{if(!S.cover)S.cover=fresh().cover;if(!S.pages||!S.pages.length)S.pages=[newPage(),newPage()];
  S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}}))};
 const meta=()=>{const m=LIB.list.find(x=>x.id==ID);if(m){m.pages=S.pages.length+1;m.prods=S.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.type!='txt'&&(b.sku||b.img||b.name)).length,0);m.c1=S.cover.c1;m.c2=S.cover.c2}};
-let LOCKED=false,lastLib='',dbT=0;
-const saveLib=()=>{const ls=JSON.stringify(LIB);return kvSet('lib',LIB).then(ok=>{if(ok)lastLib=ls;return ok})};
-const saveDbNow=()=>{if(!dbT)return;clearTimeout(dbT);dbT=0;kvSet('db',[...DB])};
-const saveDbSoon=()=>{clearTimeout(dbT);dbT=setTimeout(saveDbNow,1500)};
-const flush=()=>{clearTimeout(flush.t);if(LOCKED)return;saveDbNow();if(!S||!ID||!LIB.list.some(x=>x.id==ID))return;meta();kvSet('g:'+ID,S);if(JSON.stringify(LIB)!==lastLib)saveLib();
- try{const sz=JSON.stringify(S).length;if(sz>900000&&flush.warned!==ID){flush.warned=ID;toast('⚠ Este guia está perto do limite de ~1 MB do banco. Troque fotos escolhidas à mão por fotos da planilha ou divida o guia em dois.',9000)}}catch(_){}};
-const save=()=>{clearTimeout(flush.t);flush.t=setTimeout(flush,800)};
+const flush=()=>{clearTimeout(flush.t);if(!ID||!LIB.list.some(x=>x.id==ID))return;meta();kvSet('g:'+ID,S);kvSet('lib',LIB)};
+const save=()=>{clearTimeout(flush.t);flush.t=setTimeout(flush,400)};
 const HIST={u:[],r:[],o:null,f:null,t:0};
 const snap=()=>({cover:{...S.cover},pages:S.pages.map(p=>({...p,blocks:p.blocks.map(b=>({...b}))})),cur:CUR});
 function histUI(){const u=$('un'),r=$('re');if(u)u.disabled=!HIST.u.length;if(r)r.disabled=!HIST.r.length}
@@ -234,11 +236,9 @@ function redo(){if(!HIST.r.length){toast('Nada para refazer.',1800);return}HIST.
 const act=fn=>{histPush();fn();save();render()};
 const mk=(t,title,fn,c)=>el('button',c||'',{textContent:t,title,onclick:fn});
 const toast=(m,ms=4500)=>{const t=$('toast');t.textContent=m;t.style.display='block';t.style.animation='none';t.offsetWidth;t.style.animation='pop .3s var(--e)';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',ms)};
-function plain(e){try{e.contentEditable='plaintext-only'}catch(_){e.contentEditable='true'}return e}
-function ed(cls,o,k,ph){const e=plain(el('div',cls,{textContent:o[k]||''}));e.dataset.p=ph;e.oninput=()=>{histTouch(o,k);o[k]=e.textContent;save()};return e}
-// JPEG (webp não é gerado no Safari e viraria PNG gigante) e fundo branco; tamanho menor para o guia caber no limite de 1 MB do Firestore.
-function readImg(f,cb,max=700){const r=new FileReader();r.onerror=()=>toast('Não consegui abrir esse arquivo.',4000);r.onload=()=>{const i=new Image();i.onerror=()=>toast('Esse arquivo não parece uma imagem válida.',4000);i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=el('canvas');c.width=Math.max(1,Math.round(i.width*k));c.height=Math.max(1,Math.round(i.height*k));const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.82))};i.src=r.result};r.readAsDataURL(f)}
-function pick(cb,max){const i=el('input','',{type:'file',accept:'image/*'});i.onchange=()=>i.files[0]&&readImg(i.files[0],cb,max);i.click()}
+function ed(cls,o,k,ph){const e=el('div',cls,{contentEditable:true,textContent:o[k]||''});e.dataset.p=ph;e.oninput=()=>{histTouch(o,k);o[k]=e.textContent;save()};return e}
+function readImg(f,cb){const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,900/Math.max(i.width,i.height)),c=el('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/webp',.9))};i.src=r.result};r.readAsDataURL(f)}
+function pick(cb){const i=el('input','',{type:'file',accept:'image/*'});i.onchange=()=>i.files[0]&&readImg(i.files[0],cb);i.click()}
 function ask(o){return new Promise(res=>{const m=$('dlg');m.innerHTML='';m.className='show';
  const b=el('div','box sm'),done=v=>{m.className='';res(v)};b.append(el('h3','',{textContent:o.title}));
  if(o.text)b.append(el('p','',{textContent:o.text}));
@@ -249,79 +249,124 @@ function ask(o){return new Promise(res=>{const m=$('dlg');m.innerHTML='';m.class
 function animate(){const a=$('stage');a.classList.remove('anim');void a.offsetWidth;a.classList.add('anim');clearTimeout(animate.t);animate.t=setTimeout(()=>a.classList.remove('anim'),1200)}
 
 // ---- planilha ----
-const dbLabel=()=>{$('dbm').textContent='🗄 Banco'+(DB.size||BUYERS.size?' ✓':'')};
-$('dbm').onclick=openDbManager;
-function openDbManager(){
- const m=$('modal');m.innerHTML='';m.className='show';m.onclick=e=>{if(e.target===m)closeLib()};
- const box=el('div','box'),status=el('p','',{textContent:'Banco de produtos: '+DB.size.toLocaleString('pt-BR')+' · vínculos de compradores: '+BUYERS.size.toLocaleString('pt-BR')});
- const h=el('h2','',{textContent:'🗄 Banco de dados'}),p=el('p','',{textContent:'Importe as planilhas separadamente. Ao atualizar o banco de produtos, as alterações manuais dos itens no guia serão preservadas.'});
- const prod=mk('📊 Importar planilha de produtos','Importa SKU, descrição e URL; descrições iniciadas por * serão ignoradas',()=>{const i=el('input','',{type:'file',accept:'.xlsx,.xls,.csv'});i.onchange=()=>{const f=i.files[0];if(!f)return;if(!window.XLSX){toast('A biblioteca Excel precisa de internet.',6000);return}f.arrayBuffer().then(buf=>{const wb=XLSX.read(buf,{type:'array'}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),headers=(R[0]||[]).map(normHead),find=names=>{for(const n of names){const i=headers.indexOf(n);if(i>=0)return i}return -1},hs=find(['SEQPRODUTO','SKU','CODPRODUTO','CODIGO','CODITEM']),hd=find(['DESCRICAO','PRODUTO','NOMEPRODUTO','DESCRICAOPRODUTO']),hu=find(['URL','IMAGEM','FOTO','LINKIMAGEM','URLIMAGEM']),hcod=find(['CODPRODUTO','CODIGOPRODUTO']);if(hs<0||hd<0){toast('Precisa ter coluna de SKU/código e descrição. O banco antigo foi mantido.',7000);return}const nd=new Map();for(let j=1;j<R.length;j++){const row=R[j]||[],sku=String(row[hs]??'').trim();if(sku){const desc=String(row[hd]??'').trim();if(!desc.startsWith('*'))nd.set(sku,{sku,desc,url:hu<0?'':String(row[hu]??'').trim(),cod:(hcod<0||hcod===hs)?'':String(row[hcod]??'').trim()})}}DB=nd;kvSet('db',[...DB]);let filled=0;S.pages.forEach(pg=>pg.blocks.forEach(b=>{const u=b.type!=='txt'&&DB.get(String(b.sku||'').trim());if(u&&!String(b.name||'').trim()&&u.desc){b.name=u.desc;filled++}if(u&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));dbLabel();status.textContent='Banco de produtos atualizado: '+DB.size.toLocaleString('pt-BR')+' produtos.';save();render();toast('Banco atualizado. '+filled+' nome(s) vazio(s) preenchido(s); edições manuais preservadas.')})};i.click()},'btn');
- const buyers=mk('⬆ Importar planilha de compradores e produtos','Usa Cód Produto para vincular cada SKU ao comprador',()=>{const i=el('input','',{type:'file',accept:'.xlsx,.xls,.csv'});i.onchange=()=>{const f=i.files[0];if(!f)return;if(!window.XLSX){toast('A biblioteca Excel precisa de internet.',6000);return}f.arrayBuffer().then(buf=>{const wb=XLSX.read(buf,{type:'array'}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),headers=(R[0]||[]).map(normHead),find=names=>{for(const n of names){const i=headers.indexOf(n);if(i>=0)return i}return -1},hc=find(['CODCOMPRADOR','CODIGOCOMPRADOR','COMPRADORCODIGO']),hn=find(['COMPRADOR','NOMECOMPRADOR']),hp=find(['CODPRODUTO','CODIGOPRODUTO','SKU','SEQPRODUTO']);if(hn<0||hp<0){toast('Não encontrei Comprador e Cód Produto. Banco anterior mantido.',7000);return}const grouped=new Map();for(let j=1;j<R.length;j++){const row=R[j]||[],sku=String(row[hp]??'').trim(),name=String(row[hn]??'').trim(),code=hc<0?'':String(row[hc]??'').trim();if(sku&&name){const label=code?code+' · '+name:name,arr=grouped.get(sku)||[];if(!arr.includes(label))arr.push(label);grouped.set(sku,arr)}}const nk=v=>String(v??'').trim().replace(/\.0+$/,'').replace(/^0+(?=\d)/,''),nb=new Map(),put=(k,v)=>{if(k&&!nb.has(k))nb.set(k,v)},codToSeq=new Map();
- for(const u of DB.values()){if(u.cod){const c=String(u.cod).trim();if(!codToSeq.has(c))codToSeq.set(c,[]);codToSeq.get(c).push(u.sku)}}
- for(const [sku,names] of grouped){const v=names.join(' / ');put(sku,v);put(nk(sku),v);for(const s2 of (codToSeq.get(sku)||codToSeq.get(nk(sku))||[]))put(s2,v)}
- BUYERS=nb;kvSet('buyers',[...BUYERS]);let filled=0;const tot=new Set(),hit=new Set();
- S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const key=String(b.sku).trim(),v=BUYERS.get(key)||BUYERS.get(nk(key));tot.add(key);if(v){hit.add(key);if(!b.buyer){b.buyer=v;filled++}}}));
- save();render();dbLabel();status.textContent='Vínculos atualizados: '+BUYERS.size.toLocaleString('pt-BR')+' chaves de produto ligadas a compradores.';
- const colName=String((R[0]||[])[hp]||'?'),exP=[...grouped.keys()][0],exG=[...tot][0];
- let msg='Compradores: '+grouped.size.toLocaleString('pt-BR')+' produtos na planilha (coluna "'+colName+'"). '+hit.size+' de '+tot.size+' SKUs do guia encontrados; '+filled+' campo(s) preenchido(s).';
- if(tot.size&&!hit.size)msg+=' Nenhum SKU bate: na planilha o código é "'+exP+'" e no guia "'+exG+'". Reimporte a planilha de PRODUTOS (agora ela guarda o Cód Produto) e depois esta.';
- else if(hit.size&&!filled)msg+=' Os itens encontrados já tinham comprador (use ✎ no item para trocar).';
- toast(msg,12000)})};i.click()},'btn');
- const search=el('input','',{placeholder:'Pesquisar por descrição do produto…'});search.style.cssText='width:100%;padding:10px;border:1px solid #d9dfee;border-radius:10px;margin:12px 0';
- const results=el('div','',{ });results.style.cssText='max-height:260px;overflow:auto;border:1px solid #eef0f5;border-radius:10px';
- const draw=()=>{results.innerHTML='';const q=nrm(search.value),all=[...DB.values()].filter(u=>!String(u.desc||'').trim().startsWith('*')&&(!q||nrm(u.desc).includes(q)||nrm(u.sku).includes(q))),items=all.slice(0,100);items.forEach(u=>{const row=el('div','',{ });row.style.cssText='display:grid;grid-template-columns:90px 1fr;gap:8px;padding:8px;border-bottom:1px solid #eee';const sku=el('b','',{textContent:u.sku}),desc=el('input','',{value:u.desc});desc.style.cssText='width:100%;border:1px solid #ddd;border-radius:6px;padding:5px';desc.onchange=()=>{u.desc=desc.value;DB.set(u.sku,u);saveDbSoon();toast('Descrição do SKU '+u.sku+' atualizada.')};row.append(sku,desc);results.append(row)});if(!items.length)results.append(el('p','',{textContent:'Nenhum produto encontrado.'}));if(all.length>items.length)results.append(el('p','',{textContent:'Mostrando 100 de '+all.length.toLocaleString('pt-BR')+'. Refine a busca.'}))};search.oninput=draw;
- const backup=mk('⬇ Exportar backup completo','Baixa guias, banco de produtos e compradores em um arquivo JSON',async()=>{flush();const projects={};for(const x of LIB.list){const g=x.id===ID?S:await kvGet('g:'+x.id);if(g===FAIL){toast('Não consegui ler o guia "'+x.name+'". Backup cancelado para não sair incompleto.',7000);return}projects[x.id]=g||null}const payload={app:'Guia de Compras',version:1,exportedAt:new Date().toISOString(),lib:LIB,projects,db:[...DB],buyers:[...BUYERS]};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download='backup-guia-de-compras-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup exportado. Guarde esse arquivo em local seguro.')},'btn');
- const restore=mk('⬆ Restaurar backup JSON','Restaura guias e bancos de um backup anterior',()=>{const i=el('input','',{type:'file',accept:'.json,application/json'});i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(async raw=>{try{const x=JSON.parse(raw);if(!x||!x.lib||!Array.isArray(x.lib.list)||!x.lib.list.length||!x.projects)throw new Error('formato');const ok=await ask({title:'Restaurar backup?',text:'Isso substituirá os guias e bancos do banco compartilhado (todos os usuários verão a mudança) pelos dados do arquivo.',ok:'Restaurar',danger:1});if(!ok)return;LIB=x.lib;DB=new Map((x.db||[]).filter(([k,v])=>!String((v&&v.desc)||'').trim().startsWith('*')));BUYERS=new Map(x.buyers||[]);await saveLib();await kvSet('db',[...DB]);await kvSet('buyers',[...BUYERS]);for(const [id,g] of Object.entries(x.projects))await kvSet('g:'+id,g);ID=LIB.list.some(y=>y.id===LIB.cur)?LIB.cur:LIB.list[0].id;S=x.projects[ID]||fresh();HIST.u=[];HIST.r=[];HIST.o=null;CUR=0;SEL=null;norm();save();dbLabel();closeLib();render();toast('Backup restaurado com sucesso.')}catch(e){toast('Arquivo de backup inválido ou incompleto.',6000)}})};i.click()},'btn');
- const close=mk('Fechar','',closeLib,'btn');box.append(h, p, status, prod, buyers, backup, restore, el('div','row'),search,results,close);m.append(box);draw();
-}
-const normHead=x=>String(x??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'');
+const dbLabel=()=>{$('bx').innerHTML=DB.size?'📊 <span class="ok">'+DB.size.toLocaleString('pt-BR')+' ✓</span>':'📊 Planilha'};
+$('bx').onclick=()=>$('file').click();
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;
+ if(!window.XLSX){toast('Precisa de internet na primeira vez para ler o Excel. Conecte e recarregue.',7000);return}
+ $('bx').textContent='Lendo…';
+ f.arrayBuffer().then(buf=>setTimeout(()=>{
+  const wb=XLSX.read(buf,{type:'array'}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+  const first=R[0]||[], nc=Math.max(1,...R.slice(0,50).map(r=>r.length));
+  const normH=x=>String(x??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
+  const headers=first.map(normH);
+  let start=1, hs=headers.indexOf('SEQPRODUTO'), hd=headers.indexOf('DESCRICAO'), hu=headers.indexOf('URL');
+  if(hs<0){toast('Não achei a coluna SEQPRODUTO na planilha.',7000);dbLabel();return}
+  if(hd<0){toast('Não achei a coluna DESCRIÇÃO na planilha.',7000);dbLabel();return}
+  if(hu<0){toast('Não achei a coluna URL na planilha.',7000);dbLabel();return}
+  DB=new Map();
+  for(let i=start;i<R.length;i++){const r=R[i]||[],sku=String(r[hs]??'').trim();if(!sku)continue;
+   DB.set(sku,{sku,desc:String(r[hd]??'').trim(),url:String(r[hu]??'').trim()});
+  }
+  kvSet('db',[...DB]);dbLabel();
+  // Atualiza apenas campos que ainda estão vazios; não sobrescreve edições já feitas.
+  let upd=0;const hs0=snap();S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'||!b.sku)return;const d=DB.get(String(b.sku).trim());if(!d)return;if(!b.name&&d.desc){b.name=d.desc;upd++}if(!b.img&&d.url){/* foto continua sendo carregada da planilha */}}));
+  if(upd){HIST.u.push(hs0);HIST.r=[];HIST.o=null}
+  save();render();toast('Planilha carregada: '+DB.size.toLocaleString('pt-BR')+' produtos. SEQPRODUTO + DESCRIÇÃO + URL disponíveis para busca.')},30))};
+
 // ---- Excel ----
-// Uma linha por item: Pág. | Tema | Item nº | SKU | Item (descrição) | Complemento | Comprador.
-// "Pág." usa o mesmo número impresso no rodapé de cada página do guia (a primeira página interna é a 2).
+// Exporta no formato do "boneco": cada página vira uma coluna e os itens
+// ficam em sequência nas linhas. O arquivo de referência serve somente como
+// modelo de estrutura; nenhum conteúdo do boneco é importado para cá.
 $('xl').onclick=()=>{
  if(!window.XLSX){toast('A biblioteca de Excel não carregou (precisa de internet).',7000);return}
- const head=['Pág.','Tema','Item nº','SKU','Item (descrição)','Complemento (gramatura etc.)','Comprador'];
- const rows=[head];
- (S.pages||[]).forEach((p,k)=>{
-  let n=0;
-  (p.blocks||[]).forEach(b=>{
-   if(!b||b.type==='txt'||!(b.sku||b.name||b.desc))return;
-   n++;
-   const sku=String(b.sku||'').trim(),name=String(b.name||'').trim(),desc=String(b.desc||'').trim();
-   rows.push([k+2,String(p.title||'').trim(),n,sku,name||desc||sku,name?desc:'',String(b.buyer||'').trim()]);
-  });
- });
- if(rows.length<2){toast('Ainda não há produtos neste guia.');return}
+
+ const pages=(S.pages||[]).map((p,i)=>({
+   title:String(p.title||('Página '+String(i+1).padStart(2,'0'))),
+   blocks:(p.blocks||[]).filter(b=>b && b.type!=='txt' && (b.sku||b.name||b.desc))
+ }));
+ const total=pages.reduce((n,p)=>n+p.blocks.length,0);
+ if(!total){toast('Ainda não há produtos neste guia.');return}
+
+ // Estrutura baseada no boneco enviado:
+ // A = identificação do item | B em diante = uma coluna por página.
+ const maxItems=Math.max(0,...pages.map(p=>p.blocks.length));
+ const pageHeaders=pages.map((_,i)=>'Página '+String(i+1).padStart(2,'0'));
+ const rows=[];
+ rows.push(['','','','']);
+ rows.push(['','Lista de Envio','1ª prova','Validade']);
+ rows.push(['','','','']);
+ rows.push(['','','','','','','','','']);
+ rows.push(['Tema',...pageHeaders]);
+ rows.push(['',...pages.map(p=>p.title)]);
+
+ for(let i=0;i<maxItems;i++){
+   const row=['Item '+String(i+1).padStart(2,'0')];
+   pages.forEach(p=>{
+     const b=p.blocks[i];
+     if(!b){row.push('');return}
+     // Apenas o conteúdo textual do item, sem URL/imagem e respeitando a ordem.
+     row.push(String(b.name||b.desc||b.sku||'').trim());
+   });
+   rows.push(row);
+ }
+
+ const wb=XLSX.utils.book_new();
  const ws=XLSX.utils.aoa_to_sheet(rows);
- ws['!cols']=head.map((h,c)=>({wch:Math.min(60,Math.max(h.length+2,...rows.slice(1).map(r=>String(r[c]??'').length+2),6))}));
- ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length-1,c:head.length-1}})};
- const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Itens');
+ ws['!merges']=[{s:{r:4,c:0},e:{r:5,c:0}}];
+ const widths=[7.22,...pages.map(p=>{
+   const vals=[p.title,...p.blocks.map(b=>String(b.name||b.desc||b.sku||''))];
+   const longest=Math.max(18,...vals.map(v=>v.length));
+   return Math.min(48,Math.max(24,Math.round(longest*0.9)));
+ })];
+ ws['!cols']=widths.map(w=>({wch:w}));
+ ws['!rows']=[{hpt:18},{hpt:20},{hpt:18},{hpt:8},{hpt:22},{hpt:22}];
+
+ // Estilos próximos ao modelo enviado.
+ const border={style:'thin',color:{rgb:'000000'}};
+ const fillHeader={patternType:'solid',fgColor:{rgb:'D9EAD3'}};
+ const fillPage={patternType:'solid',fgColor:{rgb:'FFF2CC'}};
+ const centered={horizontal:'center',vertical:'center',wrapText:true};
+ const setStyle=(cell,style)=>{if(ws[cell])ws[cell].s=style};
+ ['B2','C2','D2'].forEach(a=>setStyle(a,{font:{bold:true,sz:11},fill:fillHeader,alignment:centered,border:{top:border,bottom:border,left:border,right:border}}));
+ setStyle('A5',{font:{bold:true,sz:11},alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
+ for(let c=1;c<=pages.length;c++){
+   const col=XLSX.utils.encode_col(c);
+   setStyle(col+'5',{font:{bold:true,sz:11},fill:fillHeader,alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
+   setStyle(col+'6',{font:{bold:true,sz:11},fill:fillPage,alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
+ }
+ for(let r=7;r<7+maxItems;r++){
+   setStyle('A'+r,{font:{sz:11},alignment:centered,border:{top:border,bottom:border,left:border,right:border}});
+   for(let c=1;c<=pages.length;c++){
+     const cell=XLSX.utils.encode_col(c)+r;
+     setStyle(cell,{font:{sz:11},alignment:{vertical:'top',wrapText:true},border:{top:border,bottom:border,left:border,right:border}});
+   }
+ }
+
+ XLSX.utils.book_append_sheet(wb,ws,'Planilha1');
  const filename=((S.cover.title||'guia')+' - itens.xlsx').replace(/[\\/:*?"<>|]/g,'');
- XLSX.writeFile(wb,filename);
- toast('Excel gerado: '+(rows.length-1)+' itens, uma linha por item.');
+ XLSX.writeFile(wb,filename,{cellStyles:true});
+ toast('Excel gerado no formato do boneco com '+total+' itens.');
 };
 
 // ---- biblioteca de guias ----
 const tabs=()=>{const x=LIB.list.find(y=>y.id==ID);$('gn').textContent=x?'· '+x.name:''};
-function openGuide(id){flush();return kvGet('g:'+id).then(g=>{if(g===FAIL){if(!ID){LOCKED=true;showFatal()}return}S=g||fresh();norm();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));HIST.u=[];HIST.r=[];HIST.o=null;ID=id;LIB.cur=id;CUR=0;SEL=null;FOCUS=false;document.body.classList.remove('foc');saveLib();animate();render()})}
+function openGuide(id){flush();return kvGet('g:'+id).then(g=>{S=g||fresh();norm();HIST.u=[];HIST.r=[];HIST.o=null;ID=id;LIB.cur=id;CUR=0;SEL=null;FOCUS=false;document.body.classList.remove('foc');kvSet('lib',LIB);animate();render()})}
 function newGuide(){const id='g'+Date.now().toString(36);LIB.list.push({id,name:'Guia '+(LIB.list.length+1)});kvSet('g:'+id,fresh());closeLib();openGuide(id)}
-function dup(id){flush();const x=LIB.list.find(y=>y.id==id);if(!x)return;
- Promise.resolve(id==ID?S:kvGet('g:'+id)).then(g=>{if(!g||g===FAIL){toast('Não consegui ler esse guia para duplicar. Tente de novo.',5000);return}
-  const nid='g'+Date.now().toString(36);LIB.list.push({...x,id:nid,name:x.name+' (cópia)'});
-  kvSet('g:'+nid,JSON.parse(JSON.stringify(g)));saveLib();tabs();openLib();toast('Guia duplicado.')})}
+function dup(id){flush();kvGet('g:'+id).then(g=>{const nid='g'+Date.now().toString(36),x=LIB.list.find(y=>y.id==id);
+ LIB.list.push({...x,id:nid,name:x.name+' (cópia)'});kvSet('g:'+nid,JSON.parse(JSON.stringify(g||S)));kvSet('lib',LIB);tabs();openLib();toast('Guia duplicado.')})}
 function del(id){const x=LIB.list.find(y=>y.id==id);
  ask({title:'Excluir "'+x.name+'"?',text:'O guia inteiro será apagado e não dá para desfazer.',ok:'Excluir',danger:1}).then(v=>{if(!v)return;
   LIB.list=LIB.list.filter(y=>y.id!=id);kvSet('g:'+id,null);
   let nx=null;if(!LIB.list.length){nx='g'+Date.now().toString(36);LIB.list.push({id:nx,name:'Guia 1'});kvSet('g:'+nx,fresh())}
   else if(id==ID)nx=LIB.list[0].id;
-  if(nx){ID='';openGuide(nx).then(openLib)}else{saveLib();tabs();openLib()}})}
+  if(nx){ID='';openGuide(nx).then(openLib)}else{kvSet('lib',LIB);tabs();openLib()}})}
 function closeLib(){$('modal').className=''}
 function openLib(){meta();const m=$('modal');m.innerHTML='';m.className='show';m.onclick=e=>{if(e.target===m)closeLib()};
  const box=el('div','box'),g=el('div','cards');box.append(el('h2','',{textContent:'📚 Biblioteca de guias'}),g);
  LIB.list.forEach((x,i)=>{const c=el('div','card'+(x.id==ID?' cur':'')),th=el('div','th',{textContent:x.id==ID?'aberto agora':'clique para abrir'}),n=el('div','in');
   c.style.animationDelay=i*40+'ms';th.style.background=`linear-gradient(160deg,${x.c1||'#1a8fe3'},${x.c2||'#0b3d6b'})`;
   const nm=el('input','nm2',{value:x.name,title:'Clique para renomear'});nm.onclick=e=>e.stopPropagation();
-  nm.oninput=()=>{x.name=nm.value||'Sem nome';tabs();clearTimeout(openLib.t);openLib.t=setTimeout(saveLib,700)};nm.onkeydown=e=>{if(e.key=='Enter')nm.blur()};
+  nm.oninput=()=>{x.name=nm.value||'Sem nome';kvSet('lib',LIB);tabs()};nm.onkeydown=e=>{if(e.key=='Enter')nm.blur()};
   const ac=el('div','ac');ac.append(mk('Duplicar','',e=>{e.stopPropagation();dup(x.id)}),mk('Excluir','',e=>{e.stopPropagation();del(x.id)},'dan'));
   n.append(nm,el('small','',{textContent:(x.pages||'?')+' páginas · '+(x.prods||0)+' produtos'}),ac);c.append(th,n);
   c.onclick=()=>{closeLib();if(x.id!=ID)openGuide(x.id)};g.append(c)});
@@ -333,7 +378,7 @@ $('un').onclick=undo;$('re').onclick=redo;
 // ---- migração de guias antigos: descrição da planilha -> Nome do produto ----
 const isOldBlock=b=>{if(b.type==='txt'||!b.sku||!b.desc||(b.name&&String(b.name).trim()))return false;const d=DB.get(String(b.sku).trim());return !!d&&nrm(d.desc)===nrm(b.desc)};
 async function migrate(){
- if(!DB.size){toast('Importe a planilha de produtos antes (botão 🗄 Banco): só movo textos que batem com a descrição dela.',7000);return}
+ if(!DB.size){toast('Carregue a planilha antes (botão 📊 Planilha): só movo textos que batem com a descrição dela.',7000);return}
  flush();const plan=[];let total=0;
  for(const x of LIB.list){const g=x.id==ID?S:await kvGet('g:'+x.id);if(!g||!g.pages)continue;let n=0;g.pages.forEach(p=>(p.blocks||[]).forEach(b=>{if(isOldBlock(b))n++}));if(n){plan.push([x,g,n]);total+=n}}
  if(!total){toast('Nenhum item antigo para migrar.');return}
@@ -354,18 +399,6 @@ function coverPage(){const pg=el('div','page cover'+(CUR==0?' cur':'')),h=el('h1
 function moveTo(s,p,i){const[fk,fi]=s.slice(1).split(':').map(Number),src=S.pages[fk];if(!src||(src===p&&fi===i))return;
  act(()=>{const it=src.blocks.splice(fi,1)[0];if(!it)return;p.blocks.splice(i,0,it);NEW=it;SEL=it;CUR=S.pages.indexOf(p)+1})}
 
-// Lista de resultados da busca: fica no <body>, FORA do #stage. O #stage tem filter/zoom e os blocos têm transform no hover,
-// e isso desloca qualquer position:fixed que estiver dentro deles (a lista aparecia no lugar errado).
-const RES=el('div','results');RES.style.position='fixed';RES.style.zIndex='99999';document.body.append(RES);
-let RES_FOR=null;
-const hideRes=()=>{RES.classList.remove('show');RES_FOR=null};
-const placeRes=inp=>{const r=inp.getBoundingClientRect(),top=Math.min(r.bottom,innerHeight-120);RES.style.left=r.left+'px';RES.style.width=Math.max(r.width,260)+'px';RES.style.top=top+'px';RES.style.maxHeight=Math.max(120,innerHeight-top-12)+'px'};
-RES.onmousedown=e=>e.preventDefault();
-addEventListener('resize',()=>{if(RES_FOR)hideRes()});
-addEventListener('scroll',e=>{if(RES_FOR&&!RES.contains(e.target))hideRes()},true);
-document.addEventListener('mousedown',e=>{if(RES_FOR&&e.target!==RES_FOR&&!RES.contains(e.target))hideRes()},true);
-const cleanUrl=v=>{let url=String(v||'');const m=url.match(/(https?:)?\/\/[^\s"';)]+/i);url=(m?m[0]:url).trim();if(url.startsWith('//'))url='https:'+url;return url};
-const imgSrc=v=>/^(data|blob):/i.test(String(v||''))?String(v):cleanUrl(v);
 // ---- busca de produtos: ignora acentos/maiúsculas, aceita palavras em qualquer ordem e pedaços de palavra, com ranking ----
 const nrm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const IDX=new WeakMap();
@@ -406,47 +439,32 @@ function block(p,b,i){
  const hd=el('span','hd',{textContent:'⠿',title:'Arraste para mover',draggable:true});
  if(t){d.style.background=b.bg;if(b.dir=='v')d.classList.add('vertical');
   const x=ed('t',b,'text','Escreva aqui…');x.style.fontSize=b.fs+'pt';d.append(hd,x);return d}
- const wrap=el('div','searchbox'),s=el('input','sku',{value:b.sku,placeholder:'Buscar por descrição do produto…'}),ph=el('div','ph');wrap.append(s);
- const setProduct=u=>{const sk=String(u.sku||'').trim(),prev=String(b.sku||'').trim(),changed=prev!==sk;let onde=null;
+ const wrap=el('div','searchbox'),s=el('input','sku',{value:b.sku,placeholder:'SKU ou buscar por descrição…'}),results=el('div','results'),ph=el('div','ph');wrap.append(s,results);
+ const setProduct=u=>{const sk=String(u.sku||'').trim();let onde=null;
   S.pages.forEach((q,kk)=>q.blocks.forEach(x=>{if(x!==b&&x.type!=='txt'&&String(x.sku||'').trim()===sk&&!onde)onde=kk+2}));
-  hideRes();
-  // Trocar o produto troca também nome, foto e comprador (antes ficavam os do produto anterior).
-  act(()=>{b.sku=sk;
-   if(!b.name||(changed&&prev))b.name=u.desc||'';
-   if(changed){b.img=cleanUrl(u.url)||(prev?'':b.img);b.buyer=BUYERS.get(sk)||(prev?'':(b.buyer||''))}
-   else{if(!b.img&&u.url)b.img=cleanUrl(u.url);if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)}});
+  results.classList.remove('show');
+  act(()=>{b.sku=sk;b.name=u.desc||b.name;b.img=u.url||b.img});
   if(onde)toast('⚠ O SKU '+sk+' já está no guia (página '+onde+').',6000)};
- const search=()=>{const q=s.value.trim();RES.innerHTML='';if(!q){hideRes();return}
-  RES_FOR=s;placeRes(s);
+ const search=()=>{const q=s.value.trim();results.innerHTML='';if(!q){results.classList.remove('show');return}
   const hits=findProducts(q);
-  for(const u of hits.list){const r=el('div','result'),pic=el('img','',{src:cleanUrl(u.url),alt:'',loading:'lazy'});pic.style.cssText='width:42px;height:42px;object-fit:contain;border:1px solid #edf0f5;border-radius:6px;background:#fff;flex:none';pic.onerror=()=>{pic.style.visibility='hidden'};const txt=el('div','');txt.style.cssText='min-width:0;flex:1';txt.append(el('b','',{textContent:u.desc||'Sem descrição'}),el('small','',{textContent:'SKU: '+u.sku}));r.style.cssText='display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;border-bottom:1px solid #f0f1f5;line-height:1.25';r.append(pic,txt);r.onclick=e=>{e.stopPropagation();setProduct(u)};RES.append(r)}
-  if(!hits.list.length)RES.append(el('div','nores',{textContent:'Nenhum produto encontrado. Enter usa "'+q+'" como SKU.'}));
-  else if(hits.total>hits.list.length)RES.append(el('div','nores',{textContent:'Mostrando '+hits.list.length+' de '+hits.total.toLocaleString('pt-BR')+' — continue digitando para refinar'}));
-  RES.classList.add('show')};
- s.oninput=search;s.onblur=()=>{if(RES_FOR===s)hideRes()};
- // Enter escolhe o 1º resultado; se não houver nenhum, grava o que foi digitado como SKU (antes o texto digitado se perdia).
- s.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const v=s.value.trim();if(!v)return;const h=findProducts(v,1).list[0];if(h)setProduct(h);else{hideRes();act(()=>{b.sku=v;if(!b.buyer&&BUYERS.has(v))b.buyer=BUYERS.get(v)})}}};
- const show=()=>{ph.innerHTML='';ph.classList.remove('empty');
-  const put=src=>{const im=el('img','',{src,draggable:false});im.onerror=()=>{ph.innerHTML='';ph.textContent='foto não carregou';ph.classList.add('empty')};ph.append(im)};
-  const none=t=>{ph.classList.add('empty');if(t)ph.textContent=t};
-  if(b.img){put(imgSrc(b.img));return}
-  if(!b.sku){none();ph.innerHTML='<span>digite o SKU<br>ou busque pela descrição</span>';return}
-  const u=DB.get(String(b.sku).trim());if(!u){none(DB.size?'SKU não encontrado':'carregue a planilha');return}
-  const url=cleanUrl(u.url);if(!url){none('sem foto');return}put(url)};
- const buyerTag=el('div','buyerTag',{title:'Comprador responsável'});
- if(b.buyer){const bt=el('span','',{textContent:'Comprador: '+b.buyer});bt.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';buyerTag.append(bt)}
- const editBuyer=el('button','buyerEdit',{textContent:'✎',title:'Editar comprador',type:'button'});editBuyer.onclick=e=>{e.preventDefault();e.stopPropagation();ask({title:'Editar comprador',text:'Informe o nome ou código do comprador responsável por este produto.',input:1,value:b.buyer||'',ok:'Salvar',ph:'Nome ou código do comprador'}).then(v=>{if(v===null)return;act(()=>{b.buyer=String(v).trim()})})};buyerTag.append(editBuyer);
- show();d.append(hd,wrap,ed('nm',b,'name','Nome do produto'),ed('ds',b,'desc','Descrição • gramatura'),buyerTag,ph);
+  const ex=DB.get(q);if(ex){let more=false;for(const u of DB.values()){if(u!==ex&&String(u.sku).startsWith(q)){more=true;break}}if(!more){setProduct(ex);return}}
+  for(const u of hits.list){const r=el('div','result');r.append(el('b','',{textContent:u.desc||'Sem descrição'}),el('small','',{textContent:'SKU: '+u.sku}));r.onclick=e=>{e.stopPropagation();setProduct(u)};results.append(r)}
+  if(!hits.list.length)results.append(el('div','nores',{textContent:'Nenhum produto encontrado'}));
+  else if(hits.total>hits.list.length)results.append(el('div','nores',{textContent:'Mostrando '+hits.list.length+' de '+hits.total.toLocaleString('pt-BR')+' — continue digitando para refinar'}));
+  results.classList.add('show')};
+ s.oninput=search;s.onkeydown=e=>{if(e.key==='Enter'){const x=DB.get(s.value.trim());if(x)setProduct(x);else{const h=findProducts(s.value,1).list[0];if(h)setProduct(h)}}};
+ const show=()=>{ph.innerHTML='';if(b.img){ph.append(el('img','',{src:b.img,draggable:false}));return}if(!b.sku){ph.innerHTML='<span>digite o SKU<br>ou busque pela descrição</span>';return}const u=DB.get(String(b.sku).trim());if(!u){ph.textContent=DB.size?'SKU não encontrado':'carregue a planilha';return}let url=String(u.url||'');const m=url.match(/(https?:)?\/\/[^\s"';)]+/i);url=(m?m[0]:url).trim();if(url.startsWith('//'))url='https:'+url;ph.append(el('img','',{src:url,draggable:false}))};
+ show();d.append(hd,wrap,ed('nm',b,'name','Nome do produto'),ed('ds',b,'desc','Descrição • gramatura'),ph);
  const dk=String(b.sku||'').trim(),da=dk&&DUP.get(dk);
  if(da&&da.length>1){const o=da.slice();o.splice(o.indexOf(k+2),1);d.classList.add('dup');d.append(el('span','dupb',{textContent:'⚠ repetido · pág. '+[...new Set(o)].join(', '),title:'Este SKU aparece mais de uma vez no guia'}))}
  return d}
-const vis=k=>CUR>0&&(FOCUS?k==CUR-1:k-(k%2)==(CUR-1)-((CUR-1)%2));
-function setCur(i){CUR=i;SEL=null;document.querySelectorAll('.blk.sel').forEach(x=>x.classList.remove('sel'));document.querySelectorAll('.page').forEach((x,j)=>x.classList.toggle('act',j==i&&i>0));side();dock();insp()}
+const vis=k=>CUR>0&&((FOCUS||window.matchMedia('(max-width:1100px)').matches)?k==CUR-1:k-(k%2)==(CUR-1)-((CUR-1)%2));
+function setCur(i){CUR=i;SEL=null;document.querySelectorAll('.page').forEach((x,j)=>x.classList.toggle('act',j==i&&i>0));side();dock();insp()}
 function pageEl(p,k){
  const n=k+2,pg=el('div','page '+(n%2==0?'L':'R')+(vis(k)?' cur':'')+(CUR==k+1?' act':''));pg.style.setProperty('--rows',p.rows);
  pg.onmousedown=()=>{if(CUR!==k+1)setCur(k+1)};
  pg.onclick=e=>{if(SEL&&!e.target.closest('.blk')){SEL=null;document.querySelectorAll('.blk.sel').forEach(x=>x.classList.remove('sel'));insp()}};
- const h=el('div','head'),t=plain(el('h1','',{textContent:p.title}));t.oninput=()=>{histTouch(p,'title');p.title=t.textContent;save()};t.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();t.blur()}};h.append(t);
+ const h=el('div','head'),t=el('h1','',{contentEditable:true,textContent:p.title});t.oninput=()=>{p.title=t.textContent;const nav=$('side').querySelector('.page-item[data-pageindex="'+k+'"] b');if(nav)nav.textContent='Pág. '+(k+2)+' · '+(p.title||'—');save()};h.append(t);
  const g=el('div','grid');p.blocks.forEach((b,j)=>g.append(block(p,b,j)));
  g.ondragover=e=>e.preventDefault();g.ondrop=e=>{if(e.target===g){e.preventDefault();const s=e.dataTransfer.getData('text/plain');if(s[0]=='b')moveTo(s,p,p.blocks.length)}};
  pg.append(el('div','tab'),h,g,el('div','foot',{textContent:n}),el('div','tab2'));return pg}
@@ -455,7 +473,7 @@ function pageEl(p,k){
 function bulk(){ask({title:'Colar vários SKUs',text:'Um por linha, ou separados por vírgula/espaço. Eles preenchem esta página e continuam nas próximas.',input:1,area:1,ok:'Adicionar',ph:'SKU1\nSKU2\nSKU3'}).then(v=>{if(!v)return;
  const l=v.split(/[\s,;]+/).filter(Boolean);if(!l.length)return;
  act(()=>{let k=CUR-1,p=S.pages[k];const full=q=>q.blocks.reduce((s,x)=>s+x.w*x.h,0)>=3*q.rows;
-  l.forEach(s=>{while(full(p)){if(!S.pages[++k])S.pages.push(newPage());p=S.pages[k]}const b=newProd();b.sku=s;const key=String(s).trim(),pu=DB.get(key);if(pu&&pu.desc)b.name=pu.desc;if(BUYERS.has(key))b.buyer=BUYERS.get(key);p.blocks.push(b)})});
+  l.forEach(s=>{while(full(p)){if(!S.pages[++k])S.pages.push(newPage());p=S.pages[k]}const b=newProd();b.sku=s;p.blocks.push(b)})});
  const rp=[...new Set(l.map(x=>String(x).trim()))].filter(x=>(DUP.get(x)||[]).length>1).length;
  toast(l.length+' produtos adicionados.'+(rp?' ⚠ '+rp+' SKU(s) repetido(s) no guia — marcados em laranja.':''),rp?7000:4500)})}
 function toggleFocus(){FOCUS=!FOCUS;document.body.classList.toggle('foc',FOCUS);animate();render();setTimeout(()=>{if(auto)fit()},470)}
@@ -475,9 +493,11 @@ function insp(){const r=$('insp');r.innerHTML='';const p=S.pages[CUR-1],b=SEL;
  if(CUR==0){const c=S.cover;r.append(el('h3','',{textContent:'Capa'}),el('p','',{textContent:'Cores do fundo ou foto.'}));
   const w=el('div','row');w.append(el('label','',{textContent:'Cores'}));
   ['c1','c2'].forEach(k=>w.append(el('input','',{type:'color',value:c[k],oninput:e=>{histTouch(c,k);c[k]=e.target.value;document.querySelector('.cover').style.background=cbg();save()}})));
-  r.append(w,mk('🖼 Foto de fundo','',()=>pick(u=>act(()=>c.img=u),1400),'btn'),mk('Remover foto','',()=>act(()=>c.img=''),'btn'));return}
- if(!b){r.append(el('h3','',{textContent:'Página '+(CUR+1)}),el('p','',{textContent:'Clique em um produto para editar.'}),
-  seg('Linhas',[2,3,4,5,6,7,8].map(v=>({v,t:v})),p.rows,v=>act(()=>{p.rows=v;p.blocks.forEach(x=>x.h=Math.min(x.h,v))})),
+  r.append(w,mk('🖼 Foto de fundo','',()=>pick(u=>act(()=>c.img=u)),'btn'),mk('Remover foto','',()=>act(()=>c.img=''),'btn'));return}
+ if(!b){r.append(el('h3','',{textContent:'Página '+(CUR+1)}),el('p','',{textContent:'Clique em um produto para editar.'}));
+  const order=el('div','row'),moves=el('div','seg'),up=mk('↑ Anterior','Mover a página uma posição para cima',()=>movePageBy(-1)),down=mk('↓ Próxima','Mover a página uma posição para baixo',()=>movePageBy(1));
+  up.disabled=CUR<=1;down.disabled=CUR>=S.pages.length;order.append(el('label','',{textContent:'Ordem das páginas'}),moves);moves.append(up,down);r.append(order);
+  r.append(seg('Linhas',[2,3,4,5,6,7,8].map(v=>({v,t:v})),p.rows,v=>act(()=>{p.rows=v;p.blocks.forEach(x=>x.h=Math.min(x.h,v))})),
   mk('📋 Colar vários SKUs','',bulk,'btn'),
   mk('🗑 Excluir página','',()=>ask({title:'Excluir a página '+(CUR+1)+'?',text:'Os itens dessa página serão perdidos.',ok:'Excluir',danger:1}).then(v=>{if(v)act(()=>{S.pages.splice(CUR-1,1);if(!S.pages.length)S.pages.push(newPage());CUR=Math.min(CUR,S.pages.length);SEL=null})}),'btn dan'));return}
  const t=b.type=='txt',i=p.blocks.indexOf(b);
@@ -487,22 +507,43 @@ function insp(){const r=$('insp');r.innerHTML='';const p=S.pages[CUR-1],b=SEL;
  if(t){r.append(seg('Tamanho do texto',[9,11,14,18,24].map(v=>({v,t:v})),b.fs,v=>act(()=>b.fs=v)),
   seg('Direção',[{v:'h',t:'Horizontal'},{v:'v',t:'Vertical'}],b.dir,v=>act(()=>b.dir=v)));
   const w=el('div','row');w.append(el('label','',{textContent:'Cor do quadro'}),el('input','',{type:'color',value:b.bg,oninput:e=>{histTouch(b,'bg');b.bg=e.target.value;const s=document.querySelector('.blk.sel');if(s)s.style.background=b.bg;save()}}));r.append(w)}
- else{const bw=el('div','row'),bl=el('label','',{textContent:'Comprador (campo discreto no item)'}),bi=el('input','',{value:b.buyer||'',placeholder:'Nome ou código do comprador'});bi.style.cssText='width:100%;padding:8px;border:1px solid #d9dfee;border-radius:8px;font:inherit';bi.onchange=()=>act(()=>{b.buyer=bi.value.trim()});bw.append(bl,bi);r.append(bw);if(b.sku&&BUYERS.has(String(b.sku).trim())&&!b.buyer)r.append(mk('↳ Preencher comprador da base','',()=>act(()=>b.buyer=BUYERS.get(String(b.sku).trim())),'btn'));const w=el('div','row');w.append(mk('📷 Escolher foto','',()=>pick(u=>act(()=>b.img=u)),'btn'));if(b.img)w.append(mk('Usar foto da planilha','',()=>act(()=>b.img=''),'btn'));r.append(w)}
+ else{const w=el('div','row');w.append(mk('📷 Escolher foto','',()=>pick(u=>act(()=>b.img=u)),'btn'));if(b.img)w.append(mk('Usar foto da planilha','',()=>act(()=>b.img=''),'btn'));r.append(w)}
  const mv=d=>act(()=>{const j=i+d;if(j>=0&&j<p.blocks.length){const it=p.blocks.splice(i,1)[0];p.blocks.splice(j,0,it);NEW=it}});
  const w=el('div','row'),g=el('div','seg');w.append(el('label','',{textContent:'Posição (ou arraste o item)'}),g);g.append(mk('◀ Antes','',()=>mv(-1)),mk('Depois ▶','',()=>mv(1)));
  r.append(w,mk('🗑 Excluir item','',()=>{act(()=>{p.blocks.splice(i,1);SEL=null});toast('Item excluído · Ctrl+Z para desfazer',3500)},'btn dan'))}
 
 // ---- lateral, render, navegação ----
+function movePageTo(from,dest){
+ if(from<0||dest<0||from>=S.pages.length||dest>=S.pages.length||from===dest){toast('Essa página já está nessa posição.');return}
+ histPush();const active=S.pages[CUR-1];const [moved]=S.pages.splice(from,1);S.pages.splice(dest,0,moved);CUR=S.pages.indexOf(active)+1;SEL=null;save();animate();render();toast('Ordem das páginas atualizada.');
+}
+function reorderPage(from,target){
+ if(from<0||target<0||from>=S.pages.length||target>=S.pages.length||from===target){return}
+ // O indicador fica antes do alvo; compensar quando a página vem de cima.
+ const dest=from<target?target-1:target;
+ if(dest===from){toast('Essa página já está nessa posição.');return}
+ movePageTo(from,dest);
+}
+function movePageBy(dir){const from=CUR-1;if(from<0)return;movePageTo(from,from+dir)}
 function side(){const s=$('side');s.innerHTML='';
- const item=(i,t,sub)=>{const b=el('div','it'+(i==CUR?' on':(i>0&&vis(i-1)?' sib':'')));b.append(el('b','',{textContent:t}),el('small','',{textContent:sub}));b.onclick=()=>go(i);return b};
+ const head=el('div','sidehead');head.append(el('b','',{textContent:'PÁGINAS'}),el('span','page-count',{textContent:String(S.pages.length+1)}));s.append(head);
+ const item=(i,t,sub)=>{const b=el('div','it'+(i==CUR?' on':(i>0&&vis(i-1)?' sib':'')));
+  if(i>0){b.classList.add('page-item');b.draggable=!window.matchMedia('(max-width:700px)').matches;b.dataset.pageindex=String(i-1);
+   b.ondragstart=e=>{e.dataTransfer.setData('text/page-index',String(i-1));e.dataTransfer.effectAllowed='move';b.classList.add('drag-page')};
+   b.ondragend=()=>{b.classList.remove('drag-page');s.querySelectorAll('.drop-page').forEach(x=>x.classList.remove('drop-page'))};
+   b.ondragover=e=>{if(e.dataTransfer.types.includes('text/page-index')){e.preventDefault();b.classList.add('drop-page')}};
+   b.ondragleave=()=>b.classList.remove('drop-page');
+   b.ondrop=e=>{e.preventDefault();e.stopPropagation();b.classList.remove('drop-page');const from=Number(e.dataTransfer.getData('text/page-index')),to=Number(b.dataset.pageindex);if(!Number.isInteger(from)||!Number.isInteger(to)||from===to)return;reorderPage(from,to)};
+  }
+  b.append(el('b','',{textContent:t}),el('small','',{textContent:sub}));b.onclick=()=>go(i);return b};
  s.append(item(0,'Capa',S.cover.title||'sem título'));
- S.pages.forEach((p,k)=>s.append(item(k+1,'Pág. '+(k+2)+' · '+(p.title||'—'),p.blocks.filter(b=>b.type!='txt').length+' produtos')));
- s.append(mk('＋ Nova página','',addPage,'add'))}
+ S.pages.forEach((p,k)=>s.append(item(k+1,'Pág. '+(k+2)+' · '+(p.title||'—'),p.blocks.filter(b=>b.type!='txt').length+' produtos · '+(window.matchMedia('(max-width:700px)').matches?'mova no painel':'arraste para ordenar'))));
+ s.append(mk('＋ Nova página','',addPage,'add'));if(window.matchMedia('(max-width:700px)').matches){const active=s.querySelector('.it.on');if(active)requestAnimationFrame(()=>active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}))}}
 function go(i){CUR=Math.max(0,Math.min(S.pages.length,i));SEL=null;animate();render();$('view').scrollTop=0}
 function addPage(){act(()=>{S.pages.push(newPage());CUR=S.pages.length;SEL=null});animate()}
-function render(){hideRes();calcDup();const st=$('stage');st.innerHTML='';st.append(coverPage());S.pages.forEach((p,k)=>st.append(pageEl(p,k)));tabs();side();dock();insp();histUI();if(auto)fit()}
-addEventListener('keydown',e=>{const t=e.target;if(!S)return;
- if(e.key=='Escape'){if(RES_FOR){hideRes();return}if($('dlg').className)$('dlg').onclick({target:$('dlg')});else if($('modal').className)closeLib();else if(FOCUS)toggleFocus();else if(SEL){SEL=null;render()}return}
+function render(){calcDup();const st=$('stage');st.innerHTML='';st.append(coverPage());S.pages.forEach((p,k)=>st.append(pageEl(p,k)));tabs();side();dock();insp();histUI();if(auto)fit()}
+addEventListener('keydown',e=>{const t=e.target;
+ if(e.key=='Escape'){if($('dlg').className)$('dlg').onclick({target:$('dlg')});else if($('modal').className)closeLib();else if(FOCUS)toggleFocus();else if(SEL){SEL=null;render()}return}
  const modalOpen=$('dlg').className||$('modal').className;
  if((e.key=='Delete'||e.key=='Backspace')&&!modalOpen&&CUR>0&&SEL){
   const pg=S.pages[CUR-1],ix=pg?pg.blocks.indexOf(SEL):-1;
@@ -516,46 +557,22 @@ addEventListener('keydown',e=>{const t=e.target;if(!S)return;
   if(kk=='z'&&!e.shiftKey){e.preventDefault();undo();return}
   if(kk=='y'||(kk=='z'&&e.shiftKey)){e.preventDefault();redo();return}}
  if(editing)return;
- const k=CUR-1,st=k-(k%2);
- if((e.key=='f'||e.key=='F')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!modalOpen)toggleFocus();
- if(modalOpen||e.ctrlKey||e.metaKey||e.altKey)return;
- if(e.key=='ArrowRight'){if(FOCUS)go(CUR+1);else if(CUR==0)go(1);else if(st+2<S.pages.length)go(st+3)}
- if(e.key=='ArrowLeft'){if(FOCUS)go(CUR-1);else if(st<=0)go(0);else go(st-1)}});
+ const k=CUR-1,st=k-(k%2),single=FOCUS||window.matchMedia('(max-width:1100px)').matches;
+ if(e.key=='f'||e.key=='F')toggleFocus();
+ if(e.key=='ArrowRight'){if(single)go(CUR+1);else if(CUR==0)go(1);else if(st+2<S.pages.length)go(st+3)}
+ if(e.key=='ArrowLeft'){if(single)go(CUR-1);else if(CUR<=1)go(0);else go(Math.max(st-2,0)+1)}});
 
 // ---- zoom ----
 function setZ(z,manual){Z=Math.max(.3,Math.min(2.2,z));if(manual)auto=false;$('stage').style.zoom=Z;const v=$('zv');if(v)v.textContent=Math.round(Z*100)+'%'}
-function fit(){auto=true;const v=$('view'),n=(CUR==0||FOCUS)?1:2;setZ(Math.min(FOCUS?2:1.3,(v.clientWidth-40)/(794*n),(v.clientHeight-116)/1123))}
+function fit(){auto=true;const v=$('view'),mobile=window.matchMedia('(max-width:700px)').matches,single=window.matchMedia('(max-width:1100px)').matches,n=(CUR==0||FOCUS||single)?1:2;setZ(Math.min(FOCUS?2:1.3,(v.clientWidth-(mobile?16:40))/(794*n),(v.clientHeight-(mobile?50:116))/1123))}
 addEventListener('resize',()=>{if(auto)fit()});
 
 $('pdf').onclick=()=>{toast('Na janela que abrir, em "Destino" escolha "Salvar como PDF" e clique em Salvar.');
  setTimeout(()=>{const t=document.title;document.title=(S.cover.title||'Guia de Compras').trim();print();document.title=t},1300)};
 addEventListener('beforeunload',()=>{if(S)flush()});
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&S)flush()});
-// Soltar um arquivo fora de um item fazia o navegador abrir o arquivo e sair do guia.
-const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
-addEventListener('dragover',e=>{if(hasFiles(e))e.preventDefault()});
-addEventListener('drop',e=>{if(hasFiles(e))e.preventDefault()});
-// Migra dados locais antigos somente se o banco compartilhado ainda não tiver uma biblioteca.
-async function migrateLocalIfCloudEmpty(){
- await authReady;
- try {
-  const cloudLib=await getDoc(doc(cloudDb,'appdata','lib'));
-  if(cloudLib.exists()) return;
-  const localDb=await new Promise((resolve,reject)=>{const req=indexedDB.open('guia5',1);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
-  if(!localDb.objectStoreNames.contains('kv')) return;
-  const entries=await new Promise((resolve,reject)=>{const tx=localDb.transaction('kv','readonly'),store=tx.objectStore('kv'),keysReq=store.getAllKeys(),valsReq=store.getAll();tx.oncomplete=()=>resolve(keysReq.result.map((k,i)=>[k,valsReq.result[i]]));tx.onerror=()=>reject(tx.error)});
-  for(const [key,value] of entries){if(bankKeys.has(String(key))) await kvSet(String(key),value); else await setDoc(doc(cloudDb,'appdata',String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
-  if(entries.length) console.info('Dados locais migrados para o Firestore:',entries.length);
- } catch(e){console.warn('Migração local não executada:',e)}
-}
-function showFatal(){const d=el('div','');d.style.cssText='position:fixed;inset:0;z-index:99998;background:#f4f6fae6;display:flex;align-items:center;justify-content:center;padding:20px';const b=el('div','box sm');b.append(el('h3','',{textContent:'Não consegui carregar os guias'}),el('p','',{textContent:'Para não sobrescrever nada no banco compartilhado, o salvamento foi desativado nesta sessão. Confira a conexão e recarregue a página.'}),mk('Recarregar','',()=>location.reload(),'pri'));d.append(b);document.body.append(d)}
-// Se qualquer leitura ESSENCIAL falhar, o app para sem salvar nada (antes ele abria um guia vazio e gravava por cima do real).
-migrateLocalIfCloudEmpty().then(()=>Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db'),kvGet('buyers')])).then(async([lb,pj,db,buy])=>{
- if(lb===FAIL||pj===FAIL){LOCKED=true;showFatal();return}
- if(db&&db!==FAIL){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}let removed=0;for(const [k,v] of DB){if(String((v&&v.desc)||'').trim().startsWith('*')){DB.delete(k);removed++}}if(removed)await kvSet('db',[...DB])}
- if(buy&&buy!==FAIL)BUYERS=new Map(buy);
- if(lb&&lb.list&&lb.list.length){LIB=lb;ID=LIB.list.some(x=>x.id==LIB.cur)?LIB.cur:LIB.list[0].id;const g=await kvGet('g:'+ID);if(g===FAIL){LOCKED=true;showFatal();return}S=g||fresh();lastLib=JSON.stringify(LIB)}
+Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db')]).then(async([lb,pj,db])=>{
+ if(db){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}}
+ if(lb&&lb.list&&lb.list.length){LIB=lb;ID=LIB.list.some(x=>x.id==LIB.cur)?LIB.cur:LIB.list[0].id;S=await kvGet('g:'+ID)||fresh()}
  else{ID='g1';S=pj&&pj.pages?pj:fresh();LIB={list:[{id:ID,name:(S.cover&&S.cover.title)||'Meu guia'}],cur:ID}}
- norm();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));flush();dbLabel();animate();render()
-}).catch(e=>{console.error('Falha ao iniciar o Guia:',e);LOCKED=true;showFatal()});
+ norm();flush();dbLabel();animate();render()});
 </script></body></html>
