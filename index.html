@@ -93,42 +93,6 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
 .cover h1 div{outline:none}
 .cover .rule{width:30mm;height:.6mm;background:#fff;margin:9mm auto;position:relative}
 .cover .sub{font:300 15pt "Segoe UI",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;width:100%;line-height:1.6;outline:none;position:relative}
-
-/* Organização das páginas e adaptação de tela */
-.it.page-item{position:relative;padding-left:30px;cursor:grab;border:1px solid transparent;user-select:none}
-.it.page-item:before{content:"⠿";position:absolute;left:10px;top:11px;color:#9aa3b8;font-size:17px;line-height:1}
-.it.page-item.drag-page{opacity:.45;background:#eaf0ff;border:1px dashed var(--ui)}
-.it.page-item.drop-page{box-shadow:inset 0 3px 0 var(--ui);background:#f2f5ff}
-.it.page-item:active{cursor:grabbing}
-#side .add{position:sticky;bottom:0;background:#fff;z-index:2}
-@media(max-width:1100px){
- #app{grid-template-columns:175px minmax(0,1fr);gap:10px;padding:10px}
- #insp{position:fixed;right:12px;top:70px;bottom:12px;width:250px;z-index:8;box-shadow:0 12px 40px #1e243344}
- body.foc #app{grid-template-columns:0 minmax(0,1fr)}
-}
-@media(max-width:700px){
- body{height:100dvh;grid-template-rows:auto minmax(0,1fr)}
- #top{padding:8px;gap:5px;flex-wrap:wrap;min-height:58px}
- .brand{font-size:14px;padding:4px 6px}
- #top button{padding:7px 9px;font-size:12px}
- #app{display:flex;flex-direction:column;gap:8px;padding:8px;min-height:0;overflow:hidden}
- #side{flex:none;max-height:122px;border-radius:12px;padding:8px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden}
- #side .it{flex:none;min-width:120px;max-width:180px;margin:0;padding:8px 10px 8px 28px}
- #side .it.page-item:before{left:8px;top:9px}
- #side .add{flex:none;width:auto;white-space:nowrap;margin:0;padding:8px 12px;position:static}
- #main{flex:1;min-height:0}
- #view{padding:10px 8px 90px}
- #stage{margin:0 auto}
- #insp{top:auto;right:8px;left:8px;bottom:8px;width:auto;max-height:45dvh;padding:12px;border-radius:14px}
- body.foc #app{display:flex}
- body.foc #side{display:none}
- #dock{bottom:8px;max-width:calc(100vw - 16px);overflow-x:auto;gap:0;padding:4px;border-radius:14px}
- #dock button{padding:7px 9px;font-size:12px}
- .box{padding:16px;border-radius:16px}
- .cards{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
- #modal,#dlg{padding:12px}
-}
-
 @media print{
  body{display:block;height:auto;overflow:visible;background:none}
  #top,#side,#insp,#dock,#toast,#modal,#dlg,.hd,.sku,.dupb{display:none!important}
@@ -452,23 +416,10 @@ function insp(){const r=$('insp');r.innerHTML='';const p=S.pages[CUR-1],b=SEL;
  r.append(w,mk('🗑 Excluir item','',()=>{act(()=>{p.blocks.splice(i,1);SEL=null});toast('Item excluído · Ctrl+Z para desfazer',3500)},'btn dan'))}
 
 // ---- lateral, render, navegação ----
-function reorderPage(from,to){if(from<0||to<0||from>=S.pages.length||to>=S.pages.length||from===to){toast('Essa página já está nessa posição.');return}
- histPush();const [p]=S.pages.splice(from,1);S.pages.splice(to,0,p);CUR=to+1;SEL=null;save();animate();render();toast('Página reposicionada.');}
 function side(){const s=$('side');s.innerHTML='';
- const item=(i,t,sub)=>{const b=el('div','it'+(i==CUR?' on':(i>0&&vis(i-1)?' sib':'')));
-  if(i>0){b.classList.add('page-item');b.draggable=true;b.dataset.pageindex=String(i-1);
-   b.ondragstart=e=>{e.dataTransfer.setData('text/page-index',String(i-1));e.dataTransfer.effectAllowed='move';b.classList.add('drag-page')};
-   b.ondragend=()=>{b.classList.remove('drag-page');s.querySelectorAll('.drop-page').forEach(x=>x.classList.remove('drop-page'))};
-   b.ondragover=e=>{if(e.dataTransfer.types.includes('text/page-index')){e.preventDefault();b.classList.add('drop-page')}};
-   b.ondragleave=()=>b.classList.remove('drop-page');
-   b.ondrop=e=>{e.preventDefault();e.stopPropagation();b.classList.remove('drop-page');const from=Number(e.dataTransfer.getData('text/page-index')),to=Number(b.dataset.pageindex);if(!Number.isInteger(from)||from===to)return;
-    histPush();const currentPage=CUR-1;const [moved]=S.pages.splice(from,1);S.pages.splice(to,0,moved);
-    if(currentPage===from)CUR=to+1;else if(from<currentPage&&to>=currentPage)CUR--;else if(from>currentPage&&to<=currentPage)CUR++;
-    SEL=null;save();animate();render();toast('Ordem das páginas atualizada.');};
-  }
-  b.append(el('b','',{textContent:t}),el('small','',{textContent:sub}));b.onclick=()=>go(i);return b};
+ const item=(i,t,sub)=>{const b=el('div','it'+(i==CUR?' on':(i>0&&vis(i-1)?' sib':'')));b.append(el('b','',{textContent:t}),el('small','',{textContent:sub}));b.onclick=()=>go(i);return b};
  s.append(item(0,'Capa',S.cover.title||'sem título'));
- S.pages.forEach((p,k)=>s.append(item(k+1,'Pág. '+(k+2)+' · '+(p.title||'—'),p.blocks.filter(b=>b.type!='txt').length+' produtos · arraste para ordenar')));
+ S.pages.forEach((p,k)=>s.append(item(k+1,'Pág. '+(k+2)+' · '+(p.title||'—'),p.blocks.filter(b=>b.type!='txt').length+' produtos')));
  s.append(mk('＋ Nova página','',addPage,'add'))}
 function go(i){CUR=Math.max(0,Math.min(S.pages.length,i));SEL=null;animate();render();$('view').scrollTop=0}
 function addPage(){act(()=>{S.pages.push(newPage());CUR=S.pages.length;SEL=null});animate()}
