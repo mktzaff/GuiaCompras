@@ -277,12 +277,17 @@ const newPage=()=>({title:'seção',rows:4,blocks:[]});
 const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:'',buyer:''});
 const newText=()=>({type:'txt',w:1,h:2,text:'',bg:'#fbe4ee',fs:11,dir:'h'});
 // O estado do Guia é salvo no Firestore para ficar compartilhado entre os computadores autorizados.
-const kvGet=async k=>{await authReady;try{const snap=await getDoc(doc(cloudDb,'appdata',String(k)));return snap.exists()?snap.data().value:undefined}catch(e){console.error('Falha ao ler dados do Guia:',e);return undefined}};
-const kvSet=async (k,v)=>{await authReady;try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia:',e);const msg=(e&&e.code==='permission-denied')?'Sem permissão para salvar no banco. Confira as regras do Firestore e o UID da conta.':'Falha ao salvar no banco. Confira a conexão e tente novamente.';if(typeof toast==='function')toast(msg,5000);else console.warn(msg);}};
+// Cache local durável: protege os dados caso a rede/Firebase falhe durante uma atualização.
+let cacheDbPromise;
+function openCacheDb(){if(!cacheDbPromise)cacheDbPromise=new Promise((resolve,reject)=>{const req=indexedDB.open('guia-cache-v1',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('kv'))req.result.createObjectStore('kv')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});return cacheDbPromise}
+async function cacheGet(k){try{const d=await openCacheDb();return await new Promise((resolve,reject)=>{const tx=d.transaction('kv','readonly'),r=tx.objectStore('kv').get(String(k));r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}catch(e){console.warn('Cache local indisponível:',e);return undefined}}
+async function cacheSet(k,v){try{const d=await openCacheDb();await new Promise((resolve,reject)=>{const tx=d.transaction('kv','readwrite');tx.objectStore('kv').put(v,String(k));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}catch(e){console.error('Não foi possível gravar o cache local:',e)}}
+const kvGet=async k=>{await authReady;try{const snap=await getDoc(doc(cloudDb,'appdata',String(k)));if(snap.exists()){const value=snap.data().value;await cacheSet(k,value);return value}const cached=await cacheGet(k);if(cached!==undefined){console.warn('Documento ausente no Firebase; recuperando cache local:',k);try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:cached,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',restoredFromLocalCache:true})}catch(e){console.error('Cache preservado localmente; restauração na nuvem pendente:',e)}return cached}return undefined}catch(e){console.error('Falha ao ler dados do Guia; tentando cache local:',e);return await cacheGet(k)}};
+const kvSet=async (k,v)=>{await cacheSet(k,v);await authReady;try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia na nuvem:',e);const msg=(e&&e.code==='permission-denied')?'Dados guardados neste navegador, mas sem permissão para sincronizar com a nuvem. Confira as regras do Firestore.':'Dados guardados neste navegador; falhou a sincronização com a nuvem. Não limpe os dados do navegador.';if(typeof toast==='function')toast(msg,6500);else console.warn(msg);}};
 const norm=()=>{if(!S.cover)S.cover=fresh().cover;if(!S.pages||!S.pages.length)S.pages=[newPage(),newPage()];
  S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}}))};
 const meta=()=>{const m=LIB.list.find(x=>x.id==ID);if(m){m.pages=S.pages.length+1;m.prods=S.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.type!='txt'&&(b.sku||b.img||b.name)).length,0);m.c1=S.cover.c1;m.c2=S.cover.c2}};
-const flush=()=>{clearTimeout(flush.t);if(!ID||!LIB.list.some(x=>x.id==ID))return;meta();kvSet('g:'+ID,S);kvSet('lib',LIB)};
+const flush=async()=>{clearTimeout(flush.t);if(!ID||!LIB.list.some(x=>x.id==ID))return;meta();await Promise.all([kvSet('g:'+ID,S),kvSet('lib',LIB)])};
 const save=()=>{clearTimeout(flush.t);flush.t=setTimeout(flush,400)};
 const HIST={u:[],r:[],o:null,f:null,t:0};
 const snap=()=>({cover:{...S.cover},pages:S.pages.map(p=>({...p,blocks:p.blocks.map(b=>({...b}))})),cur:CUR});
@@ -671,7 +676,7 @@ addEventListener('resize',()=>{if(auto)fit()});
 
 $('pdf').onclick=()=>{toast('Na janela que abrir, em "Destino" escolha "Salvar como PDF" e clique em Salvar.');
  setTimeout(()=>{const t=document.title;document.title=(S.cover.title||'Guia de Compras').trim();print();document.title=t},1300)};
-addEventListener('beforeunload',()=>{if(S)flush()});
+addEventListener('beforeunload',()=>{if(S){clearTimeout(flush.t);flush()}});addEventListener('pagehide',()=>{if(S){clearTimeout(flush.t);flush()}});
 // Migra dados locais antigos somente se o banco compartilhado ainda não tiver uma biblioteca.
 async function migrateLocalIfCloudEmpty(){
  await authReady;
