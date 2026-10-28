@@ -81,7 +81,7 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
 .txt.vertical{writing-mode:vertical-rl;align-items:center}
 .t{outline:none;white-space:pre-wrap}
 .nm{font-weight:700;font-size:10pt;line-height:1.2;outline:none}
-.ds{font-size:8pt;line-height:1.25;color:#444;outline:none;margin-top:.8mm}
+.ds{font-size:8pt;line-height:1.25;color:#444;outline:none;margin-top:.8mm}.buyerTag{display:flex;align-items:center;gap:3px;font-size:6.5pt;line-height:1.1;color:#8a92a8;min-height:0;margin-top:.5mm;white-space:nowrap;min-width:0;overflow:hidden}.buyerTag span{flex:1}.buyerEdit{flex:none;border:0;background:transparent;color:#8a92a8;padding:0 2px;font:10px/1 system-ui;cursor:pointer}.buyerEdit:hover{color:var(--ui)}@media print{.buyerEdit{display:none}.buyerTag{color:#777;font-size:6pt}}
 [data-p]:empty:before{content:attr(data-p);opacity:.35;font-weight:400}
 .searchbox{position:relative;display:block;width:100%;z-index:8}.searchbox .sku{width:100%;box-sizing:border-box}.results{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #d9dfee;border-radius:10px;box-shadow:0 12px 30px #0002;max-height:280px;overflow:auto;display:none;z-index:20}.results.show{display:block}.result{padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f1f5;line-height:1.25}.result:last-child{border-bottom:0}.result:hover{background:#eef3ff}.result b{display:block;font-size:12px}.result small{display:block;color:#68708a;font-size:10px;margin-top:2px}.nores{padding:10px;color:#8a92a8;font-size:11px}
 .ph{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;text-align:center;padding-top:1.5mm}
@@ -93,7 +93,13 @@ input[type=color]{border:0;padding:0;width:34px;height:30px;background:none;curs
 .cover h1 div{outline:none}
 .cover .rule{width:30mm;height:.6mm;background:#fff;margin:9mm auto;position:relative}
 .cover .sub{font:300 15pt "Segoe UI",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;width:100%;line-height:1.6;outline:none;position:relative}
-
+@media print{
+ body{display:block;height:auto;overflow:visible;background:none}
+ #top,#side,#insp,#dock,#toast,#modal,#dlg,.hd,.sku,.dupb{display:none!important}
+ #app,#main,#view{display:block;padding:0;overflow:visible;height:auto}#stage{display:block!important;zoom:1!important;filter:none}
+ .page{display:flex!important;break-after:page;animation:none!important;box-shadow:none!important}.blk{cursor:auto;animation:none!important;box-shadow:none!important;transform:none!important}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+@page{size:A4;margin:0}
 /* Organização das páginas e adaptação de tela */
 .it.page-item{position:relative;padding-left:30px;cursor:grab;border:1px solid transparent;user-select:none}
 .it.page-item:before{content:"⠿";position:absolute;left:10px;top:11px;color:#9aa3b8;font-size:17px;line-height:1}
@@ -193,14 +199,26 @@ button:disabled{opacity:.38!important;cursor:not-allowed!important;transform:non
  .cards{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:9px}
  #modal,#dlg{padding:10px}
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
+
+.page-move{display:flex;gap:4px;margin-top:5px;align-self:flex-end}
+.page-move button{padding:2px 7px;font-size:11px;line-height:1.4;border-radius:6px}
+@media(max-width:700px){.page-move{position:absolute;right:5px;bottom:4px;margin:0}.it.page-item{padding-bottom:27px!important}.it.page-item small{padding-right:40px}}
 </style></head><body>
+<div id="authGate" style="position:fixed;inset:0;z-index:99999;background:#f4f6fa;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;padding:20px">
+ <form id="authForm" style="width:min(420px,100%);background:#fff;border:1px solid #dce2ea;border-radius:18px;padding:28px;box-shadow:0 18px 55px #10203020;color:#182230">
+  <div style="font-size:30px;margin-bottom:8px">📖</div><h2 style="margin:0 0 6px">Guia de Compras</h2><p style="margin:0 0 20px;color:#586779">Acesso restrito à equipe autorizada.</p>
+  <label for="authEmail" style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">E-mail</label><input id="authEmail" type="email" autocomplete="username" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit">
+  <label for="authPassword" style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">Senha</label><input id="authPassword" type="password" autocomplete="current-password" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit">
+  <button id="authSubmit" type="submit" style="margin-top:18px;width:100%;padding:12px;border:0;border-radius:9px;background:#1769d2;color:#fff;font:600 15px system-ui;cursor:pointer">Entrar</button>
+  <p id="authError" role="alert" style="color:#b42318;font-size:13px;min-height:18px;margin-bottom:0"></p>
+ </form>
+</div>
 <div id="top">
  <button class="brand" id="lib" title="Abrir biblioteca de guias"><span class="logo">📖</span>Guia de Compras <small id="gn"></small> ▾</button>
  <input type="file" id="file" hidden accept=".xlsx,.xls,.csv">
  <button id="un" title="Desfazer (Ctrl+Z)">↶</button><button id="re" title="Refazer (Ctrl+Y)">↷</button>
- <button id="bx">📊 Planilha</button><button id="xl">⬇ Excel</button><button class="pri" id="pdf">⬇ PDF</button>
+ <button id="dbm">🗄 Banco</button><button id="xl">⬇ Excel</button><button class="pri" id="pdf">⬇ PDF</button>
 </div>
 <div id="app">
  <div id="side"></div>
@@ -208,18 +226,59 @@ button:disabled{opacity:.38!important;cursor:not-allowed!important;transform:non
  <div id="insp"></div>
 </div>
 <div id="toast"></div><div id="modal"></div><div id="dlg"></div>
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBhI-ufthYvwO-DNdErFXv88tYj1COY6mU",
+  authDomain: "guias-de-compras.firebaseapp.com",
+  projectId: "guias-de-compras",
+  storageBucket: "guias-de-compras.firebasestorage.app",
+  messagingSenderId: "132230119433",
+  appId: "1:132230119433:web:4fe4881f05f414742fb8d8",
+  measurementId: "G-274FMW0QN3"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const cloudDb = getFirestore(firebaseApp);
+let authReadyResolve;
+const authReady = new Promise(resolve => { authReadyResolve = resolve; });
+const gate = document.getElementById('authGate');
+const authForm = document.getElementById('authForm');
+const authError = document.getElementById('authError');
+let signedUser = null;
+onAuthStateChanged(auth, user => {
+  if (user) {
+    signedUser = user;
+    gate.style.display = 'none';
+    authReadyResolve(user);
+  } else {
+    signedUser = null;
+    gate.style.display = 'flex';
+  }
+});
+authForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('authSubmit');
+  btn.disabled = true; btn.textContent = 'Entrando…'; authError.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, document.getElementById('authEmail').value.trim(), document.getElementById('authPassword').value);
+  } catch (err) {
+    authError.textContent = 'Não foi possível entrar. Confere o e-mail e a senha e tenta novamente.';
+  } finally { btn.disabled = false; btn.textContent = 'Entrar'; }
+});
 const $=id=>document.getElementById(id);
 const el=(t,c,p)=>{const e=document.createElement(t);if(c)e.className=c;if(p)Object.assign(e,p);return e};
-let DB=new Map(),NEW=null,CUR=0,SEL=null,Z=1,FOCUS=false,auto=true,ID='',LIB={list:[],cur:''};
+let DB=new Map(),BUYERS=new Map(),NEW=null,CUR=0,SEL=null,Z=1,FOCUS=false,auto=true,ID='',LIB={list:[],cur:''};
 const fresh=()=>({cover:{title:'',sub:'',c1:'#1a8fe3',c2:'#0b3d6b',img:''},pages:[newPage(),newPage()]});
 let S=null;
 const newPage=()=>({title:'seção',rows:4,blocks:[]});
-const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:''});
+const newProd=()=>({type:'prod',w:1,h:1,sku:'',name:'',desc:'',img:'',buyer:''});
 const newText=()=>({type:'txt',w:1,h:2,text:'',bg:'#fbe4ee',fs:11,dir:'h'});
-const idb=new Promise((res,rej)=>{try{const r=indexedDB.open('guia5',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});
-const kvGet=k=>idb.then(d=>new Promise(r=>{const q=d.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})).catch(()=>{});
-const kvSet=(k,v)=>idb.then(d=>{d.transaction('kv','readwrite').objectStore('kv').put(v,k)}).catch(()=>{});
+// O estado do Guia é salvo no Firestore para ficar compartilhado entre os computadores autorizados.
+const kvGet=async k=>{await authReady;try{const snap=await getDoc(doc(cloudDb,'appdata',String(k)));return snap.exists()?snap.data().value:undefined}catch(e){console.error('Falha ao ler dados do Guia:',e);return undefined}};
+const kvSet=async (k,v)=>{await authReady;try{await setDoc(doc(cloudDb,'appdata',String(k)),{value:v,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||''})}catch(e){console.error('Falha ao salvar dados do Guia:',e);const msg=(e&&e.code==='permission-denied')?'Sem permissão para salvar no banco. Confira as regras do Firestore e o UID da conta.':'Falha ao salvar no banco. Confira a conexão e tente novamente.';if(typeof toast==='function')toast(msg,5000);else console.warn(msg);}};
 const norm=()=>{if(!S.cover)S.cover=fresh().cover;if(!S.pages||!S.pages.length)S.pages=[newPage(),newPage()];
  S.pages.forEach(p=>p.blocks.forEach(b=>{if(b.type==='txt'){b.fs=b.fs||11;b.dir=b.dir||'h';b.bg=b.bg||'#fbe4ee'}}))};
 const meta=()=>{const m=LIB.list.find(x=>x.id==ID);if(m){m.pages=S.pages.length+1;m.prods=S.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.type!='txt'&&(b.sku||b.img||b.name)).length,0);m.c1=S.cover.c1;m.c2=S.cover.c2}};
@@ -249,11 +308,25 @@ function ask(o){return new Promise(res=>{const m=$('dlg');m.innerHTML='';m.class
 function animate(){const a=$('stage');a.classList.remove('anim');void a.offsetWidth;a.classList.add('anim');clearTimeout(animate.t);animate.t=setTimeout(()=>a.classList.remove('anim'),1200)}
 
 // ---- planilha ----
-const dbLabel=()=>{$('bx').innerHTML=DB.size?'📊 <span class="ok">'+DB.size.toLocaleString('pt-BR')+' ✓</span>':'📊 Planilha'};
-$('bx').onclick=()=>$('file').click();
+const dbLabel=()=>{$('dbm').textContent='🗄 Banco'+(DB.size||BUYERS.size?' ✓':'')};
+$('dbm').onclick=openDbManager;
+function openDbManager(){
+ const m=$('modal');m.innerHTML='';m.className='show';m.onclick=e=>{if(e.target===m)closeLib()};
+ const box=el('div','box'),status=el('p','',{textContent:'Banco de produtos: '+DB.size.toLocaleString('pt-BR')+' · vínculos de compradores: '+BUYERS.size.toLocaleString('pt-BR')});
+ const h=el('h2','',{textContent:'🗄 Banco de dados'}),p=el('p','',{textContent:'Importe as planilhas separadamente. Ao atualizar o banco de produtos, as alterações manuais dos itens no guia serão preservadas.'});
+ const prod=mk('📊 Importar planilha de produtos','Importa SKU, descrição e URL; descrições iniciadas por * serão ignoradas',()=>{const i=el('input','',{type:'file',accept:'.xlsx,.xls,.csv'});i.onchange=()=>{const f=i.files[0];if(!f)return;if(!window.XLSX){toast('A biblioteca Excel precisa de internet.',6000);return}f.arrayBuffer().then(buf=>{const wb=XLSX.read(buf,{type:'array'}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),headers=(R[0]||[]).map(normHead),find=names=>headers.findIndex(h=>names.includes(h)),hs=find(['SEQPRODUTO','SKU','CODPRODUTO','CODIGO','CODITEM']),hd=find(['DESCRICAO','PRODUTO','NOMEPRODUTO','DESCRICAOPRODUTO']),hu=find(['URL','IMAGEM','FOTO','LINKIMAGEM','URLIMAGEM']);if(hs<0||hd<0){toast('Precisa ter coluna de SKU/código e descrição. O banco antigo foi mantido.',7000);return}const nd=new Map();for(let j=1;j<R.length;j++){const row=R[j]||[],sku=String(row[hs]??'').trim();if(sku){const desc=String(row[hd]??'').trim();if(!desc.startsWith('*'))nd.set(sku,{sku,desc,url:hu<0?'':String(row[hu]??'').trim()})}}DB=nd;kvSet('db',[...DB]);let filled=0;S.pages.forEach(pg=>pg.blocks.forEach(b=>{const u=b.type!=='txt'&&DB.get(String(b.sku||'').trim());if(u&&!String(b.name||'').trim()&&u.desc){b.name=u.desc;filled++}if(u&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));dbLabel();status.textContent='Banco de produtos atualizado: '+DB.size.toLocaleString('pt-BR')+' produtos.';save();render();toast('Banco atualizado. '+filled+' nome(s) vazio(s) preenchido(s); edições manuais preservadas.')})};i.click()},'btn');
+ const buyers=mk('⬆ Importar planilha de compradores e produtos','Usa Cód Produto para vincular cada SKU ao comprador',()=>{const i=el('input','',{type:'file',accept:'.xlsx,.xls,.csv'});i.onchange=()=>{const f=i.files[0];if(!f)return;if(!window.XLSX){toast('A biblioteca Excel precisa de internet.',6000);return}f.arrayBuffer().then(buf=>{const wb=XLSX.read(buf,{type:'array'}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),headers=(R[0]||[]).map(normHead),find=names=>headers.findIndex(h=>names.includes(h)),hc=find(['CODCOMPRADOR','CODIGO COMPRADOR','COMPRADORCODIGO']),hn=find(['COMPRADOR','NOMECOMPRADOR']),hp=find(['CODPRODUTO','CODIGOPRODUTO','SKU','SEQPRODUTO']);if(hn<0||hp<0){toast('Não encontrei Comprador e Cód Produto. Banco anterior mantido.',7000);return}const grouped=new Map();for(let j=1;j<R.length;j++){const row=R[j]||[],sku=String(row[hp]??'').trim(),name=String(row[hn]??'').trim(),code=hc<0?'':String(row[hc]??'').trim();if(sku&&name){const label=code?code+' · '+name:name,arr=grouped.get(sku)||[];if(!arr.includes(label))arr.push(label);grouped.set(sku,arr)}}const nb=new Map([...grouped].map(([sku,names])=>[sku,names.join(' / ')]));BUYERS=nb;kvSet('buyers',[...BUYERS]);let filled=0;S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim())){b.buyer=BUYERS.get(String(b.sku).trim());filled++}}));save();render();dbLabel();status.textContent='Vínculos atualizados: '+BUYERS.size.toLocaleString('pt-BR')+' produtos relacionados a compradores.';toast('Planilha de compradores conectada. '+filled+' campo(s) vazio(s) preenchido(s); edições existentes preservadas.')})};i.click()},'btn');
+ const search=el('input','',{placeholder:'Pesquisar por descrição do produto…'});search.style.cssText='width:100%;padding:10px;border:1px solid #d9dfee;border-radius:10px;margin:12px 0';
+ const results=el('div','',{ });results.style.cssText='max-height:260px;overflow:auto;border:1px solid #eef0f5;border-radius:10px';
+ const draw=()=>{results.innerHTML='';const q=nrm(search.value),items=[...DB.values()].filter(u=>!String(u.desc||'').trim().startsWith('*')&&(!q||nrm(u.desc).includes(q))).slice(0,100);items.forEach(u=>{const row=el('div','',{ });row.style.cssText='display:grid;grid-template-columns:90px 1fr;gap:8px;padding:8px;border-bottom:1px solid #eee';const sku=el('b','',{textContent:u.sku}),desc=el('input','',{value:u.desc});desc.style.cssText='width:100%;border:1px solid #ddd;border-radius:6px;padding:5px';desc.onchange=()=>{u.desc=desc.value;DB.set(u.sku,u);kvSet('db',[...DB]);toast('Descrição do SKU '+u.sku+' atualizada.')};row.append(sku,desc);results.append(row)});if(!items.length)results.append(el('p','',{textContent:'Nenhum produto encontrado.'}));if(DB.size>items.length)results.append(el('p','',{textContent:'Mostrando até 100 resultados. Refine a busca.'}))};search.oninput=draw;
+ const backup=mk('⬇ Exportar backup completo','Baixa guias, banco de produtos e compradores em um arquivo JSON',async()=>{flush();const projects={};for(const x of LIB.list){projects[x.id]=x.id===ID?S:(await kvGet('g:'+x.id)||null)}const payload={app:'Guia de Compras',version:1,exportedAt:new Date().toISOString(),lib:LIB,projects,db:[...DB],buyers:[...BUYERS]};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download='backup-guia-de-compras-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup exportado. Guarde esse arquivo em local seguro.')},'btn');
+ const restore=mk('⬆ Restaurar backup JSON','Restaura guias e bancos de um backup anterior',()=>{const i=el('input','',{type:'file',accept:'.json,application/json'});i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(async raw=>{try{const x=JSON.parse(raw);if(!x||!x.lib||!x.projects)throw new Error('formato');const ok=await ask({title:'Restaurar backup?',text:'Isso substituirá os guias e bancos salvos neste navegador pelos dados do arquivo.',ok:'Restaurar',danger:1});if(!ok)return;LIB=x.lib;DB=new Map((x.db||[]).filter(([k,v])=>!String((v&&v.desc)||'').trim().startsWith('*')));BUYERS=new Map(x.buyers||[]);await kvSet('lib',LIB);await kvSet('db',[...DB]);await kvSet('buyers',[...BUYERS]);for(const [id,g] of Object.entries(x.projects))await kvSet('g:'+id,g);ID=LIB.list.some(y=>y.id===LIB.cur)?LIB.cur:LIB.list[0].id;S=await kvGet('g:'+ID)||fresh();norm();save();dbLabel();closeLib();render();toast('Backup restaurado com sucesso.')}catch(e){toast('Arquivo de backup inválido ou incompleto.',6000)}})};i.click()},'btn');
+ const close=mk('Fechar','',closeLib,'btn');box.append(h, p, status, prod, buyers, backup, restore, el('div','row'),search,results,close);m.append(box);draw();
+}
+const normHead=x=>String(x??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'');
 $('file').onchange=e=>{const f=e.target.files[0];if(!f)return;
  if(!window.XLSX){toast('Precisa de internet na primeira vez para ler o Excel. Conecte e recarregue.',7000);return}
- $('bx').textContent='Lendo…';
+ $('dbm').textContent='Lendo planilha…';
  f.arrayBuffer().then(buf=>setTimeout(()=>{
   const wb=XLSX.read(buf,{type:'array'}),R=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
   const first=R[0]||[], nc=Math.max(1,...R.slice(0,50).map(r=>r.length));
@@ -350,7 +423,7 @@ $('xl').onclick=()=>{
 
 // ---- biblioteca de guias ----
 const tabs=()=>{const x=LIB.list.find(y=>y.id==ID);$('gn').textContent=x?'· '+x.name:''};
-function openGuide(id){flush();return kvGet('g:'+id).then(g=>{S=g||fresh();norm();HIST.u=[];HIST.r=[];HIST.o=null;ID=id;LIB.cur=id;CUR=0;SEL=null;FOCUS=false;document.body.classList.remove('foc');kvSet('lib',LIB);animate();render()})}
+function openGuide(id){flush();return kvGet('g:'+id).then(g=>{S=g||fresh();norm();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));HIST.u=[];HIST.r=[];HIST.o=null;ID=id;LIB.cur=id;CUR=0;SEL=null;FOCUS=false;document.body.classList.remove('foc');kvSet('lib',LIB);animate();render()})}
 function newGuide(){const id='g'+Date.now().toString(36);LIB.list.push({id,name:'Guia '+(LIB.list.length+1)});kvSet('g:'+id,fresh());closeLib();openGuide(id)}
 function dup(id){flush();kvGet('g:'+id).then(g=>{const nid='g'+Date.now().toString(36),x=LIB.list.find(y=>y.id==id);
  LIB.list.push({...x,id:nid,name:x.name+' (cópia)'});kvSet('g:'+nid,JSON.parse(JSON.stringify(g||S)));kvSet('lib',LIB);tabs();openLib();toast('Guia duplicado.')})}
@@ -443,7 +516,7 @@ function block(p,b,i){
  const setProduct=u=>{const sk=String(u.sku||'').trim();let onde=null;
   S.pages.forEach((q,kk)=>q.blocks.forEach(x=>{if(x!==b&&x.type!=='txt'&&String(x.sku||'').trim()===sk&&!onde)onde=kk+2}));
   results.classList.remove('show');
-  act(()=>{b.sku=sk;b.name=u.desc||b.name;b.img=u.url||b.img});
+  act(()=>{b.sku=sk;if(!b.name)b.name=u.desc||'';b.img=u.url||b.img;if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)});
   if(onde)toast('⚠ O SKU '+sk+' já está no guia (página '+onde+').',6000)};
  const search=()=>{const q=s.value.trim();results.innerHTML='';if(!q){results.classList.remove('show');return}
   const hits=findProducts(q);
@@ -454,17 +527,20 @@ function block(p,b,i){
   results.classList.add('show')};
  s.oninput=search;s.onkeydown=e=>{if(e.key==='Enter'){const x=DB.get(s.value.trim());if(x)setProduct(x);else{const h=findProducts(s.value,1).list[0];if(h)setProduct(h)}}};
  const show=()=>{ph.innerHTML='';if(b.img){ph.append(el('img','',{src:b.img,draggable:false}));return}if(!b.sku){ph.innerHTML='<span>digite o SKU<br>ou busque pela descrição</span>';return}const u=DB.get(String(b.sku).trim());if(!u){ph.textContent=DB.size?'SKU não encontrado':'carregue a planilha';return}let url=String(u.url||'');const m=url.match(/(https?:)?\/\/[^\s"';)]+/i);url=(m?m[0]:url).trim();if(url.startsWith('//'))url='https:'+url;ph.append(el('img','',{src:url,draggable:false}))};
- show();d.append(hd,wrap,ed('nm',b,'name','Nome do produto'),ed('ds',b,'desc','Descrição • gramatura'),ph);
+ const buyerTag=el('div','buyerTag',{title:'Comprador responsável'});
+ if(b.buyer){const bt=el('span','',{textContent:'Comprador: '+b.buyer});bt.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';buyerTag.append(bt)}
+ const editBuyer=el('button','buyerEdit',{textContent:'✎',title:'Editar comprador',type:'button'});editBuyer.onclick=e=>{e.preventDefault();e.stopPropagation();ask({title:'Editar comprador',text:'Informe o nome ou código do comprador responsável por este produto.',input:1,value:b.buyer||'',ok:'Salvar',ph:'Nome ou código do comprador'}).then(v=>{if(v===null)return;act(()=>{b.buyer=String(v).trim()})})};buyerTag.append(editBuyer);
+ show();d.append(hd,wrap,ed('nm',b,'name','Nome do produto'),ed('ds',b,'desc','Descrição • gramatura'),buyerTag,ph);
  const dk=String(b.sku||'').trim(),da=dk&&DUP.get(dk);
  if(da&&da.length>1){const o=da.slice();o.splice(o.indexOf(k+2),1);d.classList.add('dup');d.append(el('span','dupb',{textContent:'⚠ repetido · pág. '+[...new Set(o)].join(', '),title:'Este SKU aparece mais de uma vez no guia'}))}
  return d}
-const vis=k=>CUR>0&&((FOCUS||window.matchMedia('(max-width:1100px)').matches)?k==CUR-1:k-(k%2)==(CUR-1)-((CUR-1)%2));
+const vis=k=>CUR>0&&(FOCUS?k==CUR-1:k-(k%2)==(CUR-1)-((CUR-1)%2));
 function setCur(i){CUR=i;SEL=null;document.querySelectorAll('.page').forEach((x,j)=>x.classList.toggle('act',j==i&&i>0));side();dock();insp()}
 function pageEl(p,k){
  const n=k+2,pg=el('div','page '+(n%2==0?'L':'R')+(vis(k)?' cur':'')+(CUR==k+1?' act':''));pg.style.setProperty('--rows',p.rows);
  pg.onmousedown=()=>{if(CUR!==k+1)setCur(k+1)};
  pg.onclick=e=>{if(SEL&&!e.target.closest('.blk')){SEL=null;document.querySelectorAll('.blk.sel').forEach(x=>x.classList.remove('sel'));insp()}};
- const h=el('div','head'),t=el('h1','',{contentEditable:true,textContent:p.title});t.oninput=()=>{p.title=t.textContent;const nav=$('side').querySelector('.page-item[data-pageindex="'+k+'"] b');if(nav)nav.textContent='Pág. '+(k+2)+' · '+(p.title||'—');save()};h.append(t);
+ const h=el('div','head'),t=el('h1','',{contentEditable:true,textContent:p.title});t.oninput=()=>{p.title=t.textContent;save()};h.append(t);
  const g=el('div','grid');p.blocks.forEach((b,j)=>g.append(block(p,b,j)));
  g.ondragover=e=>e.preventDefault();g.ondrop=e=>{if(e.target===g){e.preventDefault();const s=e.dataTransfer.getData('text/plain');if(s[0]=='b')moveTo(s,p,p.blocks.length)}};
  pg.append(el('div','tab'),h,g,el('div','foot',{textContent:n}),el('div','tab2'));return pg}
@@ -494,10 +570,8 @@ function insp(){const r=$('insp');r.innerHTML='';const p=S.pages[CUR-1],b=SEL;
   const w=el('div','row');w.append(el('label','',{textContent:'Cores'}));
   ['c1','c2'].forEach(k=>w.append(el('input','',{type:'color',value:c[k],oninput:e=>{histTouch(c,k);c[k]=e.target.value;document.querySelector('.cover').style.background=cbg();save()}})));
   r.append(w,mk('🖼 Foto de fundo','',()=>pick(u=>act(()=>c.img=u)),'btn'),mk('Remover foto','',()=>act(()=>c.img=''),'btn'));return}
- if(!b){r.append(el('h3','',{textContent:'Página '+(CUR+1)}),el('p','',{textContent:'Clique em um produto para editar.'}));
-  const order=el('div','row'),moves=el('div','seg'),up=mk('↑ Anterior','Mover a página uma posição para cima',()=>movePageBy(-1)),down=mk('↓ Próxima','Mover a página uma posição para baixo',()=>movePageBy(1));
-  up.disabled=CUR<=1;down.disabled=CUR>=S.pages.length;order.append(el('label','',{textContent:'Ordem das páginas'}),moves);moves.append(up,down);r.append(order);
-  r.append(seg('Linhas',[2,3,4,5,6,7,8].map(v=>({v,t:v})),p.rows,v=>act(()=>{p.rows=v;p.blocks.forEach(x=>x.h=Math.min(x.h,v))})),
+ if(!b){r.append(el('h3','',{textContent:'Página '+(CUR+1)}),el('p','',{textContent:'Clique em um produto para editar.'}),
+  seg('Linhas',[2,3,4,5,6,7,8].map(v=>({v,t:v})),p.rows,v=>act(()=>{p.rows=v;p.blocks.forEach(x=>x.h=Math.min(x.h,v))})),
   mk('📋 Colar vários SKUs','',bulk,'btn'),
   mk('🗑 Excluir página','',()=>ask({title:'Excluir a página '+(CUR+1)+'?',text:'Os itens dessa página serão perdidos.',ok:'Excluir',danger:1}).then(v=>{if(v)act(()=>{S.pages.splice(CUR-1,1);if(!S.pages.length)S.pages.push(newPage());CUR=Math.min(CUR,S.pages.length);SEL=null})}),'btn dan'));return}
  const t=b.type=='txt',i=p.blocks.indexOf(b);
@@ -507,38 +581,35 @@ function insp(){const r=$('insp');r.innerHTML='';const p=S.pages[CUR-1],b=SEL;
  if(t){r.append(seg('Tamanho do texto',[9,11,14,18,24].map(v=>({v,t:v})),b.fs,v=>act(()=>b.fs=v)),
   seg('Direção',[{v:'h',t:'Horizontal'},{v:'v',t:'Vertical'}],b.dir,v=>act(()=>b.dir=v)));
   const w=el('div','row');w.append(el('label','',{textContent:'Cor do quadro'}),el('input','',{type:'color',value:b.bg,oninput:e=>{histTouch(b,'bg');b.bg=e.target.value;const s=document.querySelector('.blk.sel');if(s)s.style.background=b.bg;save()}}));r.append(w)}
- else{const w=el('div','row');w.append(mk('📷 Escolher foto','',()=>pick(u=>act(()=>b.img=u)),'btn'));if(b.img)w.append(mk('Usar foto da planilha','',()=>act(()=>b.img=''),'btn'));r.append(w)}
+ else{const bw=el('div','row'),bl=el('label','',{textContent:'Comprador (campo discreto no item)'}),bi=el('input','',{value:b.buyer||'',placeholder:'Nome ou código do comprador'});bi.style.cssText='width:100%;padding:8px;border:1px solid #d9dfee;border-radius:8px;font:inherit';bi.onchange=()=>act(()=>{b.buyer=bi.value.trim()});bw.append(bl,bi);r.append(bw);if(b.sku&&BUYERS.has(String(b.sku).trim())&&!b.buyer)r.append(mk('↳ Preencher comprador da base','',()=>act(()=>b.buyer=BUYERS.get(String(b.sku).trim())),'btn'));const w=el('div','row');w.append(mk('📷 Escolher foto','',()=>pick(u=>act(()=>b.img=u)),'btn'));if(b.img)w.append(mk('Usar foto da planilha','',()=>act(()=>b.img=''),'btn'));r.append(w)}
  const mv=d=>act(()=>{const j=i+d;if(j>=0&&j<p.blocks.length){const it=p.blocks.splice(i,1)[0];p.blocks.splice(j,0,it);NEW=it}});
  const w=el('div','row'),g=el('div','seg');w.append(el('label','',{textContent:'Posição (ou arraste o item)'}),g);g.append(mk('◀ Antes','',()=>mv(-1)),mk('Depois ▶','',()=>mv(1)));
  r.append(w,mk('🗑 Excluir item','',()=>{act(()=>{p.blocks.splice(i,1);SEL=null});toast('Item excluído · Ctrl+Z para desfazer',3500)},'btn dan'))}
 
 // ---- lateral, render, navegação ----
-function movePageTo(from,dest){
- if(from<0||dest<0||from>=S.pages.length||dest>=S.pages.length||from===dest){toast('Essa página já está nessa posição.');return}
- histPush();const active=S.pages[CUR-1];const [moved]=S.pages.splice(from,1);S.pages.splice(dest,0,moved);CUR=S.pages.indexOf(active)+1;SEL=null;save();animate();render();toast('Ordem das páginas atualizada.');
+function reorderPage(from,to){
+ if(!Number.isInteger(from)||!Number.isInteger(to)||from<0||to<0||from>=S.pages.length||to>=S.pages.length||from===to)return;
+ histPush();const [pg]=S.pages.splice(from,1);S.pages.splice(to,0,pg);
+ if(CUR===from+1)CUR=to+1;else if(from<CUR-1&&to>=CUR-1)CUR--;else if(from>CUR-1&&to<=CUR-1)CUR++;
+ SEL=null;save();animate();render();toast('Ordem das páginas atualizada.');
 }
-function reorderPage(from,target){
- if(from<0||target<0||from>=S.pages.length||target>=S.pages.length||from===target){return}
- // O indicador fica antes do alvo; compensar quando a página vem de cima.
- const dest=from<target?target-1:target;
- if(dest===from){toast('Essa página já está nessa posição.');return}
- movePageTo(from,dest);
-}
-function movePageBy(dir){const from=CUR-1;if(from<0)return;movePageTo(from,from+dir)}
 function side(){const s=$('side');s.innerHTML='';
- const head=el('div','sidehead');head.append(el('b','',{textContent:'PÁGINAS'}),el('span','page-count',{textContent:String(S.pages.length+1)}));s.append(head);
- const item=(i,t,sub)=>{const b=el('div','it'+(i==CUR?' on':(i>0&&vis(i-1)?' sib':'')));
-  if(i>0){b.classList.add('page-item');b.draggable=!window.matchMedia('(max-width:700px)').matches;b.dataset.pageindex=String(i-1);
-   b.ondragstart=e=>{e.dataTransfer.setData('text/page-index',String(i-1));e.dataTransfer.effectAllowed='move';b.classList.add('drag-page')};
-   b.ondragend=()=>{b.classList.remove('drag-page');s.querySelectorAll('.drop-page').forEach(x=>x.classList.remove('drop-page'))};
-   b.ondragover=e=>{if(e.dataTransfer.types.includes('text/page-index')){e.preventDefault();b.classList.add('drop-page')}};
-   b.ondragleave=()=>b.classList.remove('drop-page');
-   b.ondrop=e=>{e.preventDefault();e.stopPropagation();b.classList.remove('drop-page');const from=Number(e.dataTransfer.getData('text/page-index')),to=Number(b.dataset.pageindex);if(!Number.isInteger(from)||!Number.isInteger(to)||from===to)return;reorderPage(from,to)};
-  }
-  b.append(el('b','',{textContent:t}),el('small','',{textContent:sub}));b.onclick=()=>go(i);return b};
+ const item=(i,t,sub)=>{const b=el('div','it'+(i==CUR?' on':(i>0&&vis(i-1)?' sib':'')));b.append(el('b','',{textContent:t}),el('small','',{textContent:sub}));b.onclick=()=>go(i);return b};
  s.append(item(0,'Capa',S.cover.title||'sem título'));
- S.pages.forEach((p,k)=>s.append(item(k+1,'Pág. '+(k+2)+' · '+(p.title||'—'),p.blocks.filter(b=>b.type!='txt').length+' produtos · '+(window.matchMedia('(max-width:700px)').matches?'mova no painel':'arraste para ordenar'))));
- s.append(mk('＋ Nova página','',addPage,'add'));if(window.matchMedia('(max-width:700px)').matches){const active=s.querySelector('.it.on');if(active)requestAnimationFrame(()=>active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}))}}
+ S.pages.forEach((p,k)=>{
+  const i=k+1,b=item(i,'Pág. '+(k+2)+' · '+(p.title||'—'),p.blocks.filter(x=>x.type!='txt').length+' produtos');
+  b.classList.add('page-item');b.dataset.pageindex=String(k);b.draggable=!window.matchMedia('(max-width:700px)').matches;
+  b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/page-index',String(k));e.dataTransfer.effectAllowed='move';b.classList.add('drag-page')});
+  b.addEventListener('dragend',()=>{b.classList.remove('drag-page');s.querySelectorAll('.drop-page').forEach(x=>x.classList.remove('drop-page'))});
+  b.addEventListener('dragover',e=>{if(e.dataTransfer.types.includes('text/page-index')){e.preventDefault();e.dataTransfer.dropEffect='move';b.classList.add('drop-page')}});
+  b.addEventListener('dragleave',()=>b.classList.remove('drop-page'));
+  b.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();b.classList.remove('drop-page');const from=Number(e.dataTransfer.getData('text/page-index'));if(Number.isInteger(from))reorderPage(from,k)});
+  const controls=el('div','page-move');
+  const up=mk('↑','Mover página para cima',e=>{},'');up.onclick=e=>{e.stopPropagation();reorderPage(k,k-1)};up.disabled=k===0;
+  const down=mk('↓','Mover página para baixo',e=>{},'');down.onclick=e=>{e.stopPropagation();reorderPage(k,k+1)};down.disabled=k===S.pages.length-1;
+  controls.append(up,down);b.append(controls);s.append(b);
+ });
+ s.append(mk('＋ Nova página','',addPage,'add'))}
 function go(i){CUR=Math.max(0,Math.min(S.pages.length,i));SEL=null;animate();render();$('view').scrollTop=0}
 function addPage(){act(()=>{S.pages.push(newPage());CUR=S.pages.length;SEL=null});animate()}
 function render(){calcDup();const st=$('stage');st.innerHTML='';st.append(coverPage());S.pages.forEach((p,k)=>st.append(pageEl(p,k)));tabs();side();dock();insp();histUI();if(auto)fit()}
@@ -557,22 +628,36 @@ addEventListener('keydown',e=>{const t=e.target;
   if(kk=='z'&&!e.shiftKey){e.preventDefault();undo();return}
   if(kk=='y'||(kk=='z'&&e.shiftKey)){e.preventDefault();redo();return}}
  if(editing)return;
- const k=CUR-1,st=k-(k%2),single=FOCUS||window.matchMedia('(max-width:1100px)').matches;
+ const k=CUR-1,st=k-(k%2);
  if(e.key=='f'||e.key=='F')toggleFocus();
- if(e.key=='ArrowRight'){if(single)go(CUR+1);else if(CUR==0)go(1);else if(st+2<S.pages.length)go(st+3)}
- if(e.key=='ArrowLeft'){if(single)go(CUR-1);else if(CUR<=1)go(0);else go(Math.max(st-2,0)+1)}});
+ if(e.key=='ArrowRight'){if(FOCUS)go(CUR+1);else if(CUR==0)go(1);else if(st+2<S.pages.length)go(st+3)}
+ if(e.key=='ArrowLeft'){if(FOCUS)go(CUR-1);else if(CUR<=1)go(0);else go(Math.max(st-2,0)+1)}});
 
 // ---- zoom ----
 function setZ(z,manual){Z=Math.max(.3,Math.min(2.2,z));if(manual)auto=false;$('stage').style.zoom=Z;const v=$('zv');if(v)v.textContent=Math.round(Z*100)+'%'}
-function fit(){auto=true;const v=$('view'),mobile=window.matchMedia('(max-width:700px)').matches,single=window.matchMedia('(max-width:1100px)').matches,n=(CUR==0||FOCUS||single)?1:2;setZ(Math.min(FOCUS?2:1.3,(v.clientWidth-(mobile?16:40))/(794*n),(v.clientHeight-(mobile?50:116))/1123))}
+function fit(){auto=true;const v=$('view'),n=(CUR==0||FOCUS)?1:2;setZ(Math.min(FOCUS?2:1.3,(v.clientWidth-40)/(794*n),(v.clientHeight-116)/1123))}
 addEventListener('resize',()=>{if(auto)fit()});
 
 $('pdf').onclick=()=>{toast('Na janela que abrir, em "Destino" escolha "Salvar como PDF" e clique em Salvar.');
  setTimeout(()=>{const t=document.title;document.title=(S.cover.title||'Guia de Compras').trim();print();document.title=t},1300)};
 addEventListener('beforeunload',()=>{if(S)flush()});
-Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db')]).then(async([lb,pj,db])=>{
- if(db){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}}
+// Migra dados locais antigos somente se o banco compartilhado ainda não tiver uma biblioteca.
+async function migrateLocalIfCloudEmpty(){
+ await authReady;
+ try {
+  const cloudLib=await getDoc(doc(cloudDb,'appdata','lib'));
+  if(cloudLib.exists()) return;
+  const localDb=await new Promise((resolve,reject)=>{const req=indexedDB.open('guia5',1);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
+  if(!localDb.objectStoreNames.contains('kv')) return;
+  const entries=await new Promise((resolve,reject)=>{const tx=localDb.transaction('kv','readonly'),store=tx.objectStore('kv'),keysReq=store.getAllKeys(),valsReq=store.getAll();tx.oncomplete=()=>resolve(keysReq.result.map((k,i)=>[k,valsReq.result[i]]));tx.onerror=()=>reject(tx.error)});
+  for(const [key,value] of entries){await setDoc(doc(cloudDb,'appdata',String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
+  if(entries.length) console.info('Dados locais migrados para o Firestore:',entries.length);
+ } catch(e){console.warn('Migração local não executada:',e)}
+}
+migrateLocalIfCloudEmpty().then(()=>Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db'),kvGet('buyers')])).then(async([lb,pj,db,buy])=>{
+ if(db){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}let removed=0;for(const [k,v] of DB){if(String((v&&v.desc)||'').trim().startsWith('*')){DB.delete(k);removed++}}if(removed)await kvSet('db',[...DB])}
+ if(buy)BUYERS=new Map(buy);
  if(lb&&lb.list&&lb.list.length){LIB=lb;ID=LIB.list.some(x=>x.id==LIB.cur)?LIB.cur:LIB.list[0].id;S=await kvGet('g:'+ID)||fresh()}
  else{ID='g1';S=pj&&pj.pages?pj:fresh();LIB={list:[{id:ID,name:(S.cover&&S.cover.title)||'Meu guia'}],cur:ID}}
- norm();flush();dbLabel();animate();render()});
+ norm();S.pages.forEach(pg=>pg.blocks.forEach(b=>{if(b.type!=='txt'&&b.sku&&!b.buyer&&BUYERS.has(String(b.sku).trim()))b.buyer=BUYERS.get(String(b.sku).trim())}));flush();dbLabel();animate();render()});
 </script></body></html>
