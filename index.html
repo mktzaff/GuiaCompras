@@ -535,10 +535,10 @@ function block(p,b,i){
  if(t){d.style.background=b.bg;if(b.dir=='v')d.classList.add('vertical');
   const x=ed('t',b,'text','Escreva aqui…');x.style.fontSize=b.fs+'pt';d.append(hd,x);return d}
  const wrap=el('div','searchbox'),s=el('input','sku',{value:b.sku,placeholder:'SKU ou buscar por descrição…'}),results=el('div','results'),ph=el('div','ph');wrap.append(s,results);
- const setProduct=u=>{const sk=String(u.sku||'').trim();let onde=null;
+ const setProduct=u=>{const sk=String(u.sku||'').trim(),oldSku=String(b.sku||'').trim(),changed=oldSku!==sk;let onde=null;
   S.pages.forEach((q,kk)=>q.blocks.forEach(x=>{if(x!==b&&x.type!=='txt'&&String(x.sku||'').trim()===sk&&!onde)onde=kk+2}));
   results.classList.remove('show');
-  act(()=>{b.sku=sk;if(!b.name)b.name=u.desc||'';b.img=normalizeImageUrl(u.url)||normalizeImageUrl(b.img)||'';if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)});
+  act(()=>{b.sku=sk;const freshUrl=normalizeImageUrl(u.url);if(changed){b.name=u.desc||'';b.img=freshUrl||'';if(BUYERS.has(sk))b.buyer=BUYERS.get(sk)}else{if(!b.name)b.name=u.desc||'';if(freshUrl)b.img=freshUrl;else if(!normalizeImageUrl(b.img))b.img='';if(!b.buyer&&BUYERS.has(sk))b.buyer=BUYERS.get(sk)}});
   if(onde)toast('⚠ O SKU '+sk+' já está no guia (página '+onde+').',6000)};
  const search=()=>{const q=s.value.trim();results.innerHTML='';if(!q){results.classList.remove('show');return}
   const hits=findProducts(q);
@@ -547,7 +547,7 @@ function block(p,b,i){
    const r=el('div','result'),thumb=el('div','result-thumb'),copy=el('div','result-copy');
    const imageUrl=normalizeImageUrl(u.url);
    if(imageUrl){
-    const im=el('img','',{src:imageUrl,alt:'Foto do produto',draggable:false,loading:'lazy'});
+    const im=el('img','',{src:imageUrl,alt:'Foto do produto',draggable:false,loading:'eager',decoding:'async'});
     im.onerror=()=>{thumb.innerHTML='';thumb.textContent='▧'};thumb.append(im);
    }else thumb.textContent='▧';
    copy.append(el('b','',{textContent:u.desc||'Sem descrição'}),el('small','',{textContent:'SKU: '+u.sku}));r.append(thumb,copy);
@@ -557,7 +557,7 @@ function block(p,b,i){
   else if(hits.total>hits.list.length)results.append(el('div','nores',{textContent:'Mostrando '+hits.list.length+' de '+hits.total.toLocaleString('pt-BR')+' — continue digitando para refinar'}));
   results.classList.add('show')};
  s.oninput=search;s.onkeydown=e=>{if(e.key==='Enter'){const x=DB.get(s.value.trim());if(x)setProduct(x);else{const h=findProducts(s.value,1).list[0];if(h)setProduct(h)}}};
- const show=()=>{ph.innerHTML='';const url=normalizeImageUrl(b.img)||normalizeImageUrl(DB.get(String(b.sku||'').trim())?.url);if(!url){ph.innerHTML='<span>Sem foto válida na base<br>confira a URL ou escolha uma foto</span>';return}const im=el('img','',{src:url,draggable:false,loading:'lazy'});im.onerror=()=>{ph.innerHTML='<span>Não foi possível carregar esta imagem.<br>O link pode não ser público ou não apontar direto para uma foto.</span>'};ph.append(im)};
+ const show=()=>{ph.innerHTML='';const dbUrl=normalizeImageUrl(DB.get(String(b.sku||'').trim())?.url),url=dbUrl||normalizeImageUrl(b.img);if(!url){ph.innerHTML='<span>Sem foto válida na base<br>confira a URL ou escolha uma foto</span>';return}const im=el('img','',{src:url,draggable:false,loading:'eager',decoding:'async'});im.onerror=()=>{ph.innerHTML='<span>Não foi possível carregar esta imagem.<br>O link pode não ser público ou não apontar direto para uma foto.</span>'};ph.append(im)};
  const buyerTag=el('div','buyerTag',{title:'Comprador responsável'});
  if(b.buyer){const bt=el('span','',{textContent:'Comprador: '+b.buyer});bt.style.cssText='min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';buyerTag.append(bt)}
  const editBuyer=el('button','buyerEdit',{textContent:'✎',title:'Editar comprador',type:'button'});editBuyer.onclick=e=>{e.preventDefault();e.stopPropagation();ask({title:'Editar comprador',text:'Informe o nome ou código do comprador responsável por este produto.',input:1,value:b.buyer||'',ok:'Salvar',ph:'Nome ou código do comprador'}).then(v=>{if(v===null)return;act(()=>{b.buyer=String(v).trim()})})};buyerTag.append(editBuyer);
