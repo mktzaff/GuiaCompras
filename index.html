@@ -679,18 +679,43 @@ addEventListener('resize',()=>{if(auto)fit()});
 $('pdf').onclick=()=>{toast('Na janela que abrir, em "Destino" escolha "Salvar como PDF" e clique em Salvar.');
  setTimeout(()=>{const t=document.title;document.title=(S.cover.title||'Guia de Compras').trim();print();document.title=t},1300)};
 addEventListener('beforeunload',()=>{if(S){clearTimeout(flush.t);flush()}});addEventListener('pagehide',()=>{if(S){clearTimeout(flush.t);flush()}});
-// Migra dados locais antigos somente se o banco compartilhado ainda não tiver uma biblioteca.
+// Migra dados locais antigos registro por registro, sem sobrescrever nada que já esteja na nuvem.
 async function migrateLocalIfCloudEmpty(){
  await authReady;
- try {
-  const cloudLib=await get(ref(cloudDb,'appdata/lib'));
-  if(cloudLib.exists()) return;
-  const localDb=await new Promise((resolve,reject)=>{const req=indexedDB.open('guia5',1);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
-  if(!localDb.objectStoreNames.contains('kv')) return;
-  const entries=await new Promise((resolve,reject)=>{const tx=localDb.transaction('kv','readonly'),store=tx.objectStore('kv'),keysReq=store.getAllKeys(),valsReq=store.getAll();tx.oncomplete=()=>resolve(keysReq.result.map((k,i)=>[k,valsReq.result[i]]));tx.onerror=()=>reject(tx.error)});
-  for(const [key,value] of entries){await set(ref(cloudDb,'appdata/'+String(key)),{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true})}
-  if(entries.length) console.info('Dados locais migrados para o Realtime Database:',entries.length);
- } catch(e){console.warn('Migração local não executada:',e)}
+ const migrated=[];
+ async function migrateStore(dbName){
+  let localDb;
+  try{
+   localDb=await new Promise((resolve,reject)=>{
+    const req=indexedDB.open(dbName);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+    req.onupgradeneeded=()=>{try{req.transaction.abort()}catch(e){}};
+   });
+  }catch(e){return}
+  try{
+   if(!localDb.objectStoreNames.contains('kv'))return;
+   const entries=await new Promise((resolve,reject)=>{
+    const tx=localDb.transaction('kv','readonly'),store=tx.objectStore('kv');
+    const keysReq=store.getAllKeys(),valsReq=store.getAll();
+    tx.oncomplete=()=>resolve(keysReq.result.map((k,i)=>[String(k),valsReq.result[i]]));
+    tx.onerror=()=>reject(tx.error);
+   });
+   for(const [key,value] of entries){
+    const target=ref(cloudDb,'appdata/'+key);
+    const cloudSnap=await get(target);
+    // Preserve the existing cloud copy. Only fill genuinely missing entries from local data.
+    if(!cloudSnap.exists()){
+     await set(target,{value,updatedAt:new Date().toISOString(),updatedBy:signedUser?.uid||'',migratedFromLocal:true});
+     migrated.push(key);
+    }
+   }
+  }finally{try{localDb.close()}catch(e){}}
+ }
+ // Older app database and the protective cache introduced in v27.
+ await migrateStore('guia5');
+ await migrateStore('guia-cache-v1');
+ if(migrated.length) console.info('Registros locais ausentes restaurados para o Realtime Database:',[...new Set(migrated)]);
 }
 migrateLocalIfCloudEmpty().then(()=>Promise.all([kvGet('lib'),kvGet('proj'),kvGet('db'),kvGet('buyers')])).then(async([lb,pj,db,buy])=>{
  if(db){DB=new Map(db);for(const [k,v] of DB){if(typeof v==='string')DB.set(k,{sku:k,desc:'',url:v})}let removed=0;for(const [k,v] of DB){if(String((v&&v.desc)||'').trim().startsWith('*')){DB.delete(k);removed++}}if(removed)await kvSet('db',[...DB])}
